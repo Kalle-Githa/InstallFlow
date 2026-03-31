@@ -1,0 +1,6 @@
+@InstallFlow_HostAddress = http://localhost:5193
+
+GET {{InstallFlow_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
