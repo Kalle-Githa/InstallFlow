@@ -1,4 +1,6 @@
-﻿namespace InstallFlow.Data.Entities
+﻿using InstallFlow.Data.Enums;
+
+namespace InstallFlow.Data.Entities
 {
     public class JobMaterialRow
     {
@@ -9,7 +11,7 @@
 
         public string Name { get; set; } = null!;
         public decimal Quantity { get; set; }
-        public string Unit { get; set; } = null!;
+        public UnitType Unit { get; set; } = UnitType.Piece;
         public decimal UnitPrice { get; set; }
         public int SortOrder { get; set; }
         public bool IsExtraMaterial { get; set; }

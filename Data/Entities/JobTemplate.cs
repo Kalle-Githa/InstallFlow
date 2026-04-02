@@ -25,8 +25,5 @@ namespace InstallFlow.Data.Entities
 
         public ICollection<JobTemplateLaborRow> LaborRows { get; set; } = new List<JobTemplateLaborRow>();
         public ICollection<JobTemplateMaterialRow> MaterialRows { get; set; } = new List<JobTemplateMaterialRow>();
-        public ICollection<Job> Jobs { get; set; } = new List<Job>();
-
-
     }
 }

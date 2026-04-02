@@ -38,14 +38,7 @@ namespace InstallFlow.Data.Entities
         public ICollection<JobLaborRow> LaborRows { get; set; } = new List<JobLaborRow>();
         public ICollection<JobMaterialRow> MaterialRows { get; set; } = new List<JobMaterialRow>();
 
-        public enum JobStatus
-        {
-            Draft = 0,
-            Planned = 1,
-            InProgress = 2,
-            Completed = 3,
-            Cancelled = 4
-        }
+
 
 
     }
