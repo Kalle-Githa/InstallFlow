@@ -27,7 +27,7 @@ public class CustomerRepo : ICustomerRepo
     public async Task<Customer> CreateAsync(Customer customer)
     {
         await _context.Customers.AddAsync(customer);
-        
+
 
         return customer;
     }
@@ -41,21 +41,21 @@ public class CustomerRepo : ICustomerRepo
         }
 
         _context.Customers.Remove(customer);
-        
+
     }
 
     public async Task<Customer?> UpdateAsync(int id, Customer customer)
     {
         var getCustomer = await GetByIdAsync(id);
-        if (getCustomer == null) 
+        if (getCustomer == null)
         {
             return null;
         }
-        
-          _context.Customers.Update(customer);
-         
-         return customer;
-         
+
+        _context.Customers.Update(customer);
+
+        return customer;
+
     }
 
 
@@ -64,5 +64,13 @@ public class CustomerRepo : ICustomerRepo
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+
+
+
+    public Task<Customer> PatchAsync(int id, Customer customer)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,11 +1,11 @@
-using InstallFlow.Data.Entities;
+using InstallFlow.Data.DTO;
 
 namespace InstallFlow.Core.Interfaces;
 
 public interface ICustomerService
 {
-    Task CreateCustomerAsync(Customer customer);
+    Task<CustomerDto> CreateCustomerAsync(CreateCustomerDto customer);
     Task DeleteCustomerAsync(int id);
-    Task<Customer?> GetCustomerAsync(int id);
-    Task<List<Customer>> GetAllCustomersAsync();
+    Task<CustomerDto?> GetCustomerAsync(int id);
+    Task<List<CustomerDto>> GetAllCustomersAsync();
 }

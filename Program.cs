@@ -1,4 +1,8 @@
+using InstallFlow.Core.Interfaces;
+using InstallFlow.Core.Services;
 using InstallFlow.Data;
+using InstallFlow.Data.Interfaces;
+using InstallFlow.Data.Repos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -47,8 +51,9 @@ builder.Services.AddOpenApi();
 
 // ===== 5. DI-registreringar =====
 // Här kommer vi lägga till våra services och repositories senare, t.ex:
-// builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-// builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 
 var app = builder.Build();
 
