@@ -43,6 +43,10 @@ namespace InstallFlow.Controllers
         {
             var customer = await _customerService.CreateCustomerAsync(dto);
 
+            //return Created("", customer);
+            //return Ok();
+
+
             return CreatedAtAction(
                 nameof(GetCustomer),      // Action som bygger Location-URL
                 new { id = customer.Id }, // Id i URL:en → /api/customers/5
@@ -50,6 +54,35 @@ namespace InstallFlow.Controllers
             );
         }
 
+        [HttpDelete("{id}")]
+
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+
+
+            await _customerService.DeleteCustomerAsync(id);
+
+            return NoContent();
+
+        }
+
+        [HttpPatch("{id}")]
+
+        public async Task<IActionResult> UpdateCustomer(UpdateCustomerDto dto, int id)
+        {
+
+
+            var customer = await _customerService.UpdateCustomerAsync(dto, id);
+
+            if (customer == null)
+            {
+                return NotFound();
+
+            }
+
+            return Ok(customer);
+
+        }
 
 
 

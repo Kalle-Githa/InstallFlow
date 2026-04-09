@@ -1,19 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace InstallFlow.Data.DTO
+﻿namespace InstallFlow.Data.DTO
 {
-    public class CreateCustomerDto
+    public class UpdateCustomerDto
     {
 
-        [Required]
-        public string Company { get; set; } = null!;
+        public string? Company { get; set; }
         public string? Person { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public string? OrganizationNumber { get; set; }
-
-
-
-
     }
 }

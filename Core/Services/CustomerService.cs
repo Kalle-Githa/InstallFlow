@@ -105,5 +105,42 @@ public class CustomerService : ICustomerService
 
     }
 
+    public async Task<CustomerDto?> UpdateCustomerAsync(UpdateCustomerDto dto, int id)
+    {
+        var customer = await _customerRepo.GetByIdAsync(id);
 
+        if (customer == null)
+        {
+            return null;
+        }
+
+
+        if (dto.Company != null)
+            customer.CompanyName = dto.Company;
+        if (dto.Person != null)
+            customer.ContactPerson = dto.Person;
+        if (dto.Email != null)
+            customer.Email = dto.Email;
+        if (dto.Phone != null)
+            customer.Phone = dto.Phone;
+        if (dto.OrganizationNumber != null)
+            customer.OrganizationNumber = dto.OrganizationNumber;
+
+        customer.UpdatedAt = DateTime.Now;
+
+        await _customerRepo.UpdateAsync(id, customer);
+        await _customerRepo.SaveChangesAsync();
+
+        return new CustomerDto
+        {
+            Id = id,
+            Company = customer.CompanyName,
+            Person = customer.ContactPerson,
+            Email = customer.Email,
+            Phone = customer.Phone,
+            OrganizationNumber = customer.OrganizationNumber,
+            UpdatedAt = customer.UpdatedAt
+        };
+
+    }
 }
