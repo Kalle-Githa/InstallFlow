@@ -55,15 +55,14 @@ namespace InstallFlow.Controllers
         }
 
         [HttpDelete("{id}")]
-
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-
-
-            await _customerService.DeleteCustomerAsync(id);
-
+            var deleted = await _customerService.DeleteCustomerAsync(id);
+            if (!deleted)
+            {
+                return NotFound();
+            }
             return NoContent();
-
         }
 
         [HttpPatch("{id}")]

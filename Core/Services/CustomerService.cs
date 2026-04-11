@@ -36,15 +36,14 @@ public class CustomerService : ICustomerService
 
         return new CustomerDto
         {
-
+            Id = customer.Id,
             Company = customer.CompanyName,
             Person = customer.ContactPerson,
+            Email = customer.Email,
             Phone = customer.Phone,
             OrganizationNumber = customer.OrganizationNumber,
-            Id = customer.Id,
             CreatedAt = customer.CreatedAt,
             UpdatedAt = customer.UpdatedAt,
-
         };
     }
 
@@ -92,17 +91,17 @@ public class CustomerService : ICustomerService
 
     }
 
-    public async Task DeleteCustomerAsync(int id)
+    public async Task<bool> DeleteCustomerAsync(int id)
     {
-
         var customer = await _customerRepo.GetByIdAsync(id);
         if (customer == null)
         {
-            return;
-
+            return false;
         }
-        await _customerRepo.DeleteAsync(id);
 
+        await _customerRepo.DeleteAsync(id);
+        await _customerRepo.SaveChangesAsync();
+        return true;
     }
 
     public async Task<CustomerDto?> UpdateCustomerAsync(UpdateCustomerDto dto, int id)

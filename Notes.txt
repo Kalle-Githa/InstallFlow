@@ -1,0 +1,10 @@
+
+Kör detta i din PC i appsettings.json filen:
+"ConnectionStrings": {
+    "DefaultConnection": "Server=ULTRAG\\SQLEXPRESS;Database=InstallFlowDb;Integrated Security=SSPI;TrustServerCertificate=True"
+  },
+  
+Kör detta i din Mac:  
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost,1433;Database=InstallFlowDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
+}

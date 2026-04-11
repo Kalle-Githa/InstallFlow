@@ -53,6 +53,8 @@ builder.Services.AddOpenApi();
 // Här kommer vi lägga till våra services och repositories senare, t.ex:
 builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IAssignmentRepo, AssignmentRepo>();   
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 
 
 var app = builder.Build();
