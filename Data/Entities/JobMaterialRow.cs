@@ -13,7 +13,7 @@ namespace InstallFlow.Data.Entities
         public decimal Quantity { get; set; }
         public UnitType Unit { get; set; } = UnitType.Piece;
         public decimal UnitPrice { get; set; }
-        public int SortOrder { get; set; }
+       
         public bool IsExtraMaterial { get; set; }
 
         //public int ProductId { get; set; }

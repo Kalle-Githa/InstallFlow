@@ -1,0 +1,62 @@
+using InstallFlow.Core.Interfaces;
+using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InstallFlow.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class JobsController : ControllerBase
+{
+    private readonly IJobService _jobService;
+
+    public JobsController(IJobService jobService)
+    {
+        _jobService = jobService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllJobs([FromQuery] int? assignmentId = null)
+    {
+        var jobs = await _jobService.GetAllJobsAsync(assignmentId);
+        return Ok(jobs);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetJob(int id)
+    {
+        var job = await _jobService.GetJobAsync(id);
+        if (job == null) return NotFound();
+        return Ok(job);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateJob(CreateJobDto dto)
+    {
+        var job = await _jobService.CreateJobAsync(dto);
+        if (job == null)
+            return BadRequest(new { error = "Assignment not found." });
+
+        return CreatedAtAction(
+            nameof(GetJob),
+            new { id = job.Id },
+            job
+        );
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdateJob(UpdateJobDto dto, int id)
+    {
+        var job = await _jobService.UpdateJobAsync(dto, id);
+        if (job == null) return NotFound();
+        return Ok(job);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteJob(int id)
+    {
+        var deleted = await _jobService.DeleteJobAsync(id);
+        if (!deleted) return NotFound();
+        return NoContent();
+    }
+}

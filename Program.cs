@@ -55,6 +55,8 @@ builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAssignmentRepo, AssignmentRepo>();   
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<IJobRepo, JobRepo>();
+builder.Services.AddScoped<IJobService, JobService>();
 
 
 var app = builder.Build();

@@ -112,7 +112,7 @@ namespace InstallFlow.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AssignmentId")
+                    b.Property<int?>("AssignmentId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -201,9 +201,6 @@ namespace InstallFlow.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("JobId");
@@ -232,9 +229,6 @@ namespace InstallFlow.Data.Migrations
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
 
                     b.Property<int>("Unit")
                         .HasColumnType("int");
@@ -331,9 +325,6 @@ namespace InstallFlow.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("JobTemplateId");
@@ -369,9 +360,6 @@ namespace InstallFlow.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
 
                     b.Property<int>("Unit")
                         .HasColumnType("int");
@@ -440,9 +428,7 @@ namespace InstallFlow.Data.Migrations
                 {
                     b.HasOne("InstallFlow.Data.Entities.Assignment", "Assignment")
                         .WithMany("Jobs")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssignmentId");
 
                     b.HasOne("InstallFlow.Data.Entities.User", "CreatedByUser")
                         .WithMany("CreatedJobs")

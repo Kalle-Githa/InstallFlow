@@ -6,8 +6,8 @@ namespace InstallFlow.Data.Entities
     {
         public int Id { get; set; }
 
-        public int AssignmentId { get; set; }
-        public Assignment Assignment { get; set; } = null!;
+        public int? AssignmentId { get; set; }
+        public Assignment? Assignment { get; set; } 
 
         public int? JobTemplateId { get; set; }
         public JobTemplate? JobTemplate { get; set; }

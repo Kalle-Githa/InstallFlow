@@ -8,6 +8,5 @@
         public string Name { get; set; } = null!;
         public decimal Hours { get; set; }
         public decimal HourlyRate { get; set; }
-        public int SortOrder { get; set; }
     }
 }

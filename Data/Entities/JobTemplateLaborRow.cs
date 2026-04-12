@@ -10,7 +10,7 @@
         public string Name { get; set; } = null!;
         public decimal DefaultHours { get; set; }
         public decimal DefaultHourlyRate { get; set; }
-        public int SortOrder { get; set; }
+ 
 
     }
 }
