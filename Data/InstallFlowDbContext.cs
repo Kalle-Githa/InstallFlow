@@ -17,6 +17,15 @@ namespace InstallFlow.Data
         public DbSet<JobTemplate> JobTemplates => Set<JobTemplate>();
         public DbSet<JobTemplateLaborRow> JobTemplateLaborRows => Set<JobTemplateLaborRow>();
         public DbSet<JobTemplateMaterialRow> JobTemplateMaterialRows => Set<JobTemplateMaterialRow>();
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+        public DbSet<Cart> Carts => Set<Cart>();
+        public DbSet<CartItem> CartItems => Set<CartItem>();
+
+
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -100,6 +109,19 @@ namespace InstallFlow.Data
                 entity.Property(r => r.DefaultQuantity).HasPrecision(18, 2);
                 entity.Property(r => r.DefaultUnitPrice).HasPrecision(18, 2);
             });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+
+                entity.Property(r => r.DefaultPrice).HasPrecision(18, 2);
+            });
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+
+                entity.Property(r => r.UnitPriceSnapshot).HasPrecision(18, 2);
+            });
+
+
         }
     }
 }

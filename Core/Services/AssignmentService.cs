@@ -43,7 +43,7 @@ public class AssignmentService : IAssignmentService
             Description = dto.Description,
             Address = dto.Address,
             Status = AssignmentStatus.Draft,
-            CreatedByUserId = 1,                 // TODO: ersätt med inloggad user när JWT är klar
+            CreatedByUserId = 2,                 // TODO: ersätt med inloggad user när JWT är klar
             CreatedAt = DateTime.Now
         };
 
@@ -70,7 +70,7 @@ public class AssignmentService : IAssignmentService
             assignment.Status = parsed;
 
         assignment.UpdatedAt = DateTime.Now;
-        assignment.UpdatedByUserId = 1;          // TODO: JWT
+        assignment.UpdatedByUserId = 2;          // TODO: JWT
 
         await _assignmentRepo.SaveChangesAsync();
         return MapToDto(assignment);

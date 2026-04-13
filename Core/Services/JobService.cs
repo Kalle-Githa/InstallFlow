@@ -52,14 +52,14 @@ public class JobService : IJobService
             LaborMarkupValue = dto.LaborMarkupValue,
             MaterialMarkupType = ParseMarkupType(dto.MaterialMarkupType),
             MaterialMarkupValue = dto.MaterialMarkupValue,
-            CreatedByUserId = 1,   // TODO: JWT
+            CreatedByUserId = 2,   // TODO: JWT
             CreatedAt = DateTime.Now,
             LaborRows = dto.LaborRows.Select(r => new JobLaborRow
             {
                 Name = r.Name,
                 Hours = r.Hours,
                 HourlyRate = r.HourlyRate,
-               
+
             }).ToList(),
             MaterialRows = dto.MaterialRows.Select(r => new JobMaterialRow
             {
@@ -67,7 +67,7 @@ public class JobService : IJobService
                 Quantity = r.Quantity,
                 Unit = ParseUnitType(r.Unit),
                 UnitPrice = r.UnitPrice,
-               
+
                 IsExtraMaterial = r.IsExtraMaterial
             }).ToList()
         };
@@ -99,7 +99,7 @@ public class JobService : IJobService
             job.Status = parsedStatus;
 
         job.UpdatedAt = DateTime.Now;
-        job.UpdatedByUserId = 1;   // TODO: JWT
+        job.UpdatedByUserId = 2;   // TODO: JWT
 
         await _jobRepo.SaveChangesAsync();
         return MapToDto(job);
