@@ -11,3 +11,4 @@
         public decimal UnitPriceSnapshot { get; set; }
     }
 }
+

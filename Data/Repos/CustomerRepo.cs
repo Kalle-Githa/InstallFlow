@@ -27,6 +27,7 @@ public class CustomerRepo : ICustomerRepo
     public async Task<Customer> CreateAsync(Customer customer)
     {
         await _context.Customers.AddAsync(customer);
+        await _context.SaveChangesAsync();
 
 
         return customer;
@@ -41,6 +42,7 @@ public class CustomerRepo : ICustomerRepo
         }
 
         _context.Customers.Remove(customer);
+        await _context.SaveChangesAsync();
 
     }
 
@@ -53,21 +55,11 @@ public class CustomerRepo : ICustomerRepo
         }
 
         _context.Customers.Update(customer);
+        await _context.SaveChangesAsync();
 
         return customer;
 
     }
-
-
-
-
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
-
-
-
 
     public Task<Customer> PatchAsync(int id, Customer customer)
     {
