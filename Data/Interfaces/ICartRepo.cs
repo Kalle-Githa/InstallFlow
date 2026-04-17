@@ -6,6 +6,7 @@ namespace InstallFlow.Data.Interfaces
     {
         Task<Cart?> GetCartByIdAsync(int id);
         Task<Cart?> GetCartByUserIdAsync(int userId);
+        Task<CartItem?> GetCartItemByIdAsync(int id);
         Task<Cart> CreateCartAsync(Cart cart);
         Task<CartItem> AddCartItemAsync(CartItem cartItem);
         Task UpdateCartItemAsync(CartItem cartItem);

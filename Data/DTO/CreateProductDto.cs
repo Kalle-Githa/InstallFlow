@@ -15,11 +15,5 @@ namespace InstallFlow.Data.DTO
         [Required]
         [MinLength(1, ErrorMessage = "Produkten måste tillhöra minst en kategori.")]
         public List<int> Categories { get; set; } = null!;
-
-
-
-
-
-
     }
 }

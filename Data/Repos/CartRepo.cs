@@ -45,11 +45,6 @@ namespace InstallFlow.Data.Repos
             .Include(c => c.CartItems)
             .ThenInclude(ci => ci.Product)
             .FirstOrDefaultAsync(c => c.Id == id);
-
-
-
-
-
         }
 
         public async Task<Cart?> GetCartByUserIdAsync(int userId)
@@ -58,6 +53,13 @@ namespace InstallFlow.Data.Repos
             .Include(c => c.CartItems)
             .ThenInclude(ci => ci.Product)
             .FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+
+
+        public async Task<CartItem?> GetCartItemByIdAsync(int id)
+        {
+
+            return await _context.CartItems.FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task RemoveCartItemAsync(CartItem cartItem)

@@ -28,7 +28,7 @@ public class CustomerService : ICustomerService
 
         };
         await _customerRepo.CreateAsync(customer);
-        await _customerRepo.SaveChangesAsync();
+
 
 
 
@@ -50,7 +50,6 @@ public class CustomerService : ICustomerService
     public async Task<List<CustomerDto>> GetAllCustomersAsync()
     {
         var allCustomers = await _customerRepo.GetAllAsync();
-
         return allCustomers.Select(customer => new CustomerDto
         {
             Id = customer.Id,
@@ -62,7 +61,6 @@ public class CustomerService : ICustomerService
             CreatedAt = customer.CreatedAt,
             UpdatedAt = customer.UpdatedAt
         }).ToList();
-
     }
 
     public async Task<CustomerDto?> GetCustomerAsync(int id)
@@ -100,7 +98,7 @@ public class CustomerService : ICustomerService
         }
 
         await _customerRepo.DeleteAsync(id);
-        await _customerRepo.SaveChangesAsync();
+
         return true;
     }
 
@@ -128,7 +126,7 @@ public class CustomerService : ICustomerService
         customer.UpdatedAt = DateTime.Now;
 
         await _customerRepo.UpdateAsync(id, customer);
-        await _customerRepo.SaveChangesAsync();
+
 
         return new CustomerDto
         {

@@ -1,0 +1,100 @@
+﻿using InstallFlow.Core.Interfaces;
+using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InstallFlow.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CartsController : ControllerBase
+    {
+        private readonly ICartService _cartService;
+
+        public CartsController(ICartService cartService)
+        {
+            _cartService = cartService;
+        }
+
+
+
+
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Cart(int id)
+        {
+            var cart = await _cartService.GetCartByIdAsync(id);
+            if (cart == null)
+            {
+                return NotFound();
+
+            }
+
+
+            return Ok(cart);
+
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> CartByUserId(int userId)
+        {
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return NotFound();
+
+            }
+
+
+            return Ok(cart);
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCart(CreateCartDto dto)
+        {
+            var cart = await _cartService.CreateCartAsync(dto);
+
+            return Ok(cart);
+        }
+
+        [HttpPost("items")]
+        public async Task<IActionResult> AddCartItem(AddCartItemDto dto)
+        {
+            var cartItem = await _cartService.AddCartItemAsync(dto);
+            return Ok(cartItem);
+        }
+
+        [HttpPut("items/{id}")]
+        public async Task<IActionResult> UpdateCartItem(int id, UpdateCartItemDto dto)
+        {
+            await _cartService.UpdateCartItemAsync(dto, id);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> RemoveCartItem(int id)
+
+        {
+            await _cartService.RemoveCartItemAsync(id);
+
+            return NoContent();
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+}
