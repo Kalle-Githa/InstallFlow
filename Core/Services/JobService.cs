@@ -125,8 +125,8 @@ public class JobService : IJobService
                 Id = r.Id,
                 Name = r.Name,
                 Hours = r.Hours,
-                HourlyRate = r.HourlyRate,
-                RowTotal = r.Hours * r.HourlyRate,
+                HourlyRate = r.HourlyRate
+
             }).ToList();
 
         var materialRows = j.MaterialRows
@@ -137,7 +137,6 @@ public class JobService : IJobService
                 Quantity = r.Quantity,
                 Unit = r.Unit.ToString(),
                 UnitPrice = r.UnitPrice,
-                RowTotal = r.Quantity * r.UnitPrice,
                 IsExtraMaterial = r.IsExtraMaterial
             }).ToList();
 

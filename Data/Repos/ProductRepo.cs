@@ -14,12 +14,26 @@ namespace InstallFlow.Data.Repos
 
         public async Task<List<Product>> GetAllAsync()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .ToListAsync();
         }
 
         public async Task<Product?> GetProductByIdAsync(int id)
         {
-            return await _context.Products.FindAsync(id);
+            return await _context.Products
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Product?> GetBySlugAsync(string slug)
+        {
+            return await _context.Products
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .FirstOrDefaultAsync(p => p.UrlSlug == slug);
         }
 
         public async Task<Product> CreateAsync(Product product)
@@ -43,5 +57,7 @@ namespace InstallFlow.Data.Repos
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
+
+
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace InstallFlow.Data.Entities
+﻿using InstallFlow.Data.Enums;
+
+namespace InstallFlow.Data.Entities
 {
     public class Cart
     {
@@ -12,5 +14,6 @@
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public CartStatus Status { get; set; } = CartStatus.Active;
     }
 }

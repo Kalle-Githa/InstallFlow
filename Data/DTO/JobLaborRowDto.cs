@@ -6,6 +6,6 @@ public class JobLaborRowDto
     public string Name { get; set; } = null!;
     public decimal Hours { get; set; }
     public decimal HourlyRate { get; set; }
-    public decimal RowTotal { get; set; }   // ← Hours * HourlyRate, beräknat
-    
+    public decimal RowTotal => Hours * HourlyRate;
+
 }

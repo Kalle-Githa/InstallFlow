@@ -7,6 +7,7 @@ namespace InstallFlow.Data.Interfaces
         Task<Product?> GetProductByIdAsync(int id);
         Task<List<Product>> GetAllAsync();
         Task<Product> CreateAsync(Product product);
+        Task<Product?> GetBySlugAsync(string slug);
         Task UpdateAsync(Product product);
         Task DeleteAsync(int id);
 

@@ -15,6 +15,14 @@ namespace InstallFlow.Controllers
             _cartService = cartService;
         }
 
+        // TODO: [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllCarts()
+        {
+            var carts = await _cartService.GetAllCartsAsync();
+            return Ok(carts);
+        }
+
 
 
 
@@ -50,19 +58,32 @@ namespace InstallFlow.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCart(CreateCartDto dto)
-        {
-            var cart = await _cartService.CreateCartAsync(dto);
-
-            return Ok(cart);
-        }
-
         [HttpPost("items")]
         public async Task<IActionResult> AddCartItem(AddCartItemDto dto)
         {
             var cartItem = await _cartService.AddCartItemAsync(dto);
             return Ok(cartItem);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCart(CreateCartDto dto)
+        {
+            try
+            {
+                var cart = await _cartService.CreateCartAsync(dto);
+                return CreatedAtAction(nameof(CartByUserId), new { userId = cart.UserId }, cart);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/complete")]
+        public async Task<IActionResult> CompleteCart(int id)
+        {
+            await _cartService.CompleteCartAsync(id);
+            return NoContent();
         }
 
         [HttpPut("items/{id}")]
@@ -72,16 +93,18 @@ namespace InstallFlow.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("items/{id}")]
         public async Task<IActionResult> RemoveCartItem(int id)
-
         {
             await _cartService.RemoveCartItemAsync(id);
-
             return NoContent();
+        }
 
-
-
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCart(int id)
+        {
+            await _cartService.DeleteCartAsync(id);
+            return NoContent();
         }
 
 

@@ -61,6 +61,8 @@ builder.Services.AddScoped<ICartRepo, CartRepo>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 
 
 var app = builder.Build();

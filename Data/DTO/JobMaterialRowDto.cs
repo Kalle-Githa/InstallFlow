@@ -7,6 +7,6 @@ public class JobMaterialRowDto
     public decimal Quantity { get; set; }
     public string Unit { get; set; } = null!;
     public decimal UnitPrice { get; set; }
-    public decimal RowTotal { get; set; }   // ← Quantity * UnitPrice, beräknat
+    public decimal RowTotal => Quantity * UnitPrice;
     public bool IsExtraMaterial { get; set; }
 }

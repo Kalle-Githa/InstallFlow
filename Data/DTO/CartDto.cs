@@ -1,4 +1,6 @@
-﻿namespace InstallFlow.Data.DTO
+﻿using InstallFlow.Data.Enums;
+
+namespace InstallFlow.Data.DTO
 {
     public class CartDto
     {
@@ -8,6 +10,7 @@
         public int? JobId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public CartStatus Status { get; set; }
         public List<CartItemDto> CartItems { get; set; } = new();
         public decimal TotalPrice => CartItems.Sum(x => x.TotalPrice);
     }
