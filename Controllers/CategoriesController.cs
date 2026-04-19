@@ -1,6 +1,9 @@
 ﻿using InstallFlow.Core.Interfaces;
 using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+namespace InstallFlow.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -29,6 +32,7 @@ public class CategoriesController : ControllerBase
         return Ok(category);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateCategoryDto dto)
     {
@@ -36,13 +40,15 @@ public class CategoriesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdateCategory([FromBody]JsonPatchDocument<UpdateCategoryDto> patchDoc, int id)
     {
-        await _categoryService.UpdateCategoryAsync(dto, id);
-        return NoContent();
+        var category = await _categoryService.UpdateCategoryAsync(patchDoc, id);
+        return Ok(category);
     }
-
+    
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

@@ -22,6 +22,15 @@ public class AssignmentService : IAssignmentService
         var assignments = await _assignmentRepo.GetAllAsync();
         return assignments.Select(MapToDto).ToList();
     }
+    
+    
+    public async Task<List<AssignmentDto>> GetAllByUserIdAsync(int userId)
+    {
+        var assignments = await _assignmentRepo.GetAllByUserIdAsync(userId);
+        return assignments.Select(MapToDto).ToList();
+    }
+    
+    
 
     public async Task<AssignmentDto?> GetAssignmentAsync(int id)
     {
@@ -30,7 +39,7 @@ public class AssignmentService : IAssignmentService
         return MapToDto(assignment);
     }
 
-    public async Task<AssignmentDto?> CreateAssignmentAsync(CreateAssignmentDto dto)
+    public async Task<AssignmentDto?> CreateAssignmentAsync(CreateAssignmentDto dto, int userId)
     {
         // Kolla att kunden finns innan vi skapar uppdraget
         var customer = await _customerRepo.GetByIdAsync(dto.CustomerId);
@@ -43,7 +52,7 @@ public class AssignmentService : IAssignmentService
             Description = dto.Description,
             Address = dto.Address,
             Status = AssignmentStatus.Draft,
-            CreatedByUserId = 2,                 // TODO: ersätt med inloggad user när JWT är klar
+            CreatedByUserId = userId,                 
             CreatedAt = DateTime.Now
         };
 
@@ -55,7 +64,8 @@ public class AssignmentService : IAssignmentService
         return MapToDto(created!);
     }
 
-    public async Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id)
+    public async Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId)
+    
     {
         var assignment = await _assignmentRepo.GetByIdAsync(id);
         if (assignment == null) return null;
@@ -70,7 +80,7 @@ public class AssignmentService : IAssignmentService
             assignment.Status = parsed;
 
         assignment.UpdatedAt = DateTime.Now;
-        assignment.UpdatedByUserId = 2;          // TODO: JWT
+        assignment.UpdatedByUserId = userId;        
 
         await _assignmentRepo.SaveChangesAsync();
         return MapToDto(assignment);

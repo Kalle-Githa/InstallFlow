@@ -1,4 +1,5 @@
 ﻿using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace InstallFlow.Core.Interfaces
 {
@@ -8,7 +9,8 @@ namespace InstallFlow.Core.Interfaces
         Task<CategoryDto?> GetCategoryByIdAsync(int id);
         Task<List<CategoryDto>> GetCategoryBySlugAsync(string slug);
         Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto);
-        Task UpdateCategoryAsync(UpdateCategoryDto dto, int id);
+        Task<CategoryDto> UpdateCategoryAsync(JsonPatchDocument<UpdateCategoryDto> patchDoc, int id);
+
         Task DeleteCategoryAsync(int id);
     }
 }

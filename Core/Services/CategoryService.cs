@@ -2,6 +2,9 @@
 using InstallFlow.Data.DTO;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
+
+namespace InstallFlow.Core.Services;
 
 public class CategoryService : ICategoryService
 {
@@ -60,16 +63,30 @@ public class CategoryService : ICategoryService
         return MapToDto(category);
     }
 
-    public async Task UpdateCategoryAsync(UpdateCategoryDto dto, int id)
+
+
+    public async Task<CategoryDto> UpdateCategoryAsync(JsonPatchDocument<UpdateCategoryDto> patchDoc, int id)
     {
         var category = await _categoryRepo.GetByIdAsync(id);
         if (category == null) throw new KeyNotFoundException("Kategorin hittades inte.");
 
+        var dto = new UpdateCategoryDto
+        {
+            Name = category.Name,
+            Image = category.Image
+
+        };
+        
+        patchDoc.ApplyTo(dto);
+
         if (dto.Name != null) category.Name = dto.Name;
         if (dto.Image != null) category.Image = dto.Image;
+        category.UrlSlug = category.Name.ToLower().Replace(" ", "-");
         category.UpdatedAt = DateTime.UtcNow;
 
         await _categoryRepo.UpdateAsync(category);
+        var updatedCategory = await _categoryRepo.GetByIdAsync(id);
+        return MapToDto(updatedCategory!);
     }
 
     public async Task DeleteCategoryAsync(int id)

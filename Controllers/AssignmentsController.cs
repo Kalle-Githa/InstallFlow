@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using InstallFlow.Core.Interfaces;
 using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstallFlow.Controllers;
@@ -15,14 +17,19 @@ public class AssignmentsController : ControllerBase
         _assignmentService = assignmentService;
     }
 
+    [Authorize]
     [HttpGet]
+    
     public async Task<IActionResult> GetAllAssignments()
     {
-        var assignments = await _assignmentService.GetAllAssignmentsAsync();
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var assignments = await _assignmentService.GetAllByUserIdAsync(userId);
         return Ok(assignments);
     }
-
+    
+    [Authorize]
     [HttpGet("{id}")]
+    
     public async Task<IActionResult> GetAssignment(int id)
     {
         var assignment = await _assignmentService.GetAssignmentAsync(id);
@@ -30,28 +37,31 @@ public class AssignmentsController : ControllerBase
         return Ok(assignment);
     }
 
+    [Authorize]
     [HttpPost]
+    
     public async Task<IActionResult> CreateAssignment(CreateAssignmentDto dto)
     {
-        var assignment = await _assignmentService.CreateAssignmentAsync(dto);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var assignment = await _assignmentService.CreateAssignmentAsync(dto, userId);
         if (assignment == null)
             return BadRequest(new { error = "Customer not found." });
 
-        return CreatedAtAction(
-            nameof(GetAssignment),
-            new { id = assignment.Id },
-            assignment
-        );
+        return CreatedAtAction(nameof(GetAssignment), new { id = assignment.Id }, assignment);
     }
 
+    [Authorize]
     [HttpPatch("{id}")]
+    
     public async Task<IActionResult> UpdateAssignment(UpdateAssignmentDto dto, int id)
     {
-        var assignment = await _assignmentService.UpdateAssignmentAsync(dto, id);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var assignment = await _assignmentService.UpdateAssignmentAsync(dto, id, userId);
         if (assignment == null) return NotFound();
         return Ok(assignment);
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAssignment(int id)
     {

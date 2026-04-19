@@ -8,7 +8,6 @@ public interface ICustomerRepo
     Task<Customer?> GetByIdAsync(int id);
     Task<Customer> CreateAsync(Customer customer);
     Task<Customer> UpdateAsync(int id, Customer customer);
-    Task<Customer> PatchAsync(int id, Customer customer);
     Task DeleteAsync(int id);
 
 

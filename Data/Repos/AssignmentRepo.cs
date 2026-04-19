@@ -20,6 +20,14 @@ public class AssignmentRepo : IAssignmentRepo
             .Include(a => a.Customer)      // ← hämta kunden med, för CustomerName
             .ToListAsync();
     }
+    
+    public async Task<List<Assignment>> GetAllByUserIdAsync(int userId)
+    {
+        return await _context.Assignments
+            .Include(a => a.Customer)
+            .Where(a => a.CreatedByUserId == userId)
+            .ToListAsync();
+    }
 
     public async Task<Assignment?> GetByIdAsync(int id)
     {

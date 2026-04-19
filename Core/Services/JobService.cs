@@ -30,7 +30,7 @@ public class JobService : IJobService
         return MapToDto(job);
     }
 
-    public async Task<JobDto?> CreateJobAsync(CreateJobDto dto)
+    public async Task<JobDto?> CreateJobAsync(CreateJobDto dto, int userId)
     {
         // Om assignmentId är satt, kolla att det faktiskt finns
         if (dto.AssignmentId.HasValue)
@@ -52,7 +52,7 @@ public class JobService : IJobService
             LaborMarkupValue = dto.LaborMarkupValue,
             MaterialMarkupType = ParseMarkupType(dto.MaterialMarkupType),
             MaterialMarkupValue = dto.MaterialMarkupValue,
-            CreatedByUserId = 2,   // TODO: JWT
+            CreatedByUserId = userId, 
             CreatedAt = DateTime.Now,
             LaborRows = dto.LaborRows.Select(r => new JobLaborRow
             {
@@ -80,7 +80,7 @@ public class JobService : IJobService
         return MapToDto(created!);
     }
 
-    public async Task<JobDto?> UpdateJobAsync(UpdateJobDto dto, int id)
+    public async Task<JobDto?> UpdateJobAsync(UpdateJobDto dto, int id,int userId)
     {
         var job = await _jobRepo.GetByIdAsync(id);
         if (job == null) return null;
@@ -99,7 +99,7 @@ public class JobService : IJobService
             job.Status = parsedStatus;
 
         job.UpdatedAt = DateTime.Now;
-        job.UpdatedByUserId = 2;   // TODO: JWT
+        job.UpdatedByUserId = userId;  
 
         await _jobRepo.SaveChangesAsync();
         return MapToDto(job);

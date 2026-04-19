@@ -2,6 +2,9 @@
 using InstallFlow.Data.DTO;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
+
+namespace InstallFlow.Core.Services;
 
 public class ProductService : IProductService
 {
@@ -74,20 +77,41 @@ public class ProductService : IProductService
         return products.Select(MapToDto).ToList();
     }
 
-    public async Task UpdateProductAsync(UpdateProductDto dto, int id)
+    
+    public async Task<ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id)
     {
         var product = await _productRepo.GetProductByIdAsync(id);
         if (product == null)
             throw new KeyNotFoundException("Produkten hittades inte.");
 
+        // Steg 2: Mappa entitet → DTO
+        var dto = new UpdateProductDto
+        {
+            Name = product.Name,
+            Description = product.Description,
+            DefaultPrice = product.DefaultPrice,
+            Image = product.Image
+        };
+
+        // Steg 3: Applicera patch-operationerna på DTO:n
+        patchDoc.ApplyTo(dto);
+
+        // Steg 4: Mappa tillbaka DTO → entitet
         if (dto.Name != null) product.Name = dto.Name;
         if (dto.Description != null) product.Description = dto.Description;
         if (dto.DefaultPrice.HasValue) product.DefaultPrice = dto.DefaultPrice.Value;
         if (dto.Image != null) product.Image = dto.Image;
 
+        // Uppdatera slug om namnet ändrades
+        product.UrlSlug = product.Name.ToLower().Replace(" ", "-");
         product.UpdatedAt = DateTime.UtcNow;
+
         await _productRepo.UpdateAsync(product);
+
+        var updated = await _productRepo.GetProductByIdAsync(id);
+        return MapToDto(updated!);
     }
+    
 
     public async Task DeleteProductAsync(int id)
     {

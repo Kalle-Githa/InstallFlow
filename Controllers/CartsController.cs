@@ -1,5 +1,7 @@
-﻿using InstallFlow.Core.Interfaces;
+﻿using System.Security.Claims;
+using InstallFlow.Core.Interfaces;
 using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstallFlow.Controllers
@@ -15,7 +17,8 @@ namespace InstallFlow.Controllers
             _cartService = cartService;
         }
 
-        // TODO: [Authorize(Roles = "Admin")]
+        
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllCarts()
         {
@@ -28,6 +31,7 @@ namespace InstallFlow.Controllers
 
 
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Cart(int id)
         {
@@ -43,6 +47,7 @@ namespace InstallFlow.Controllers
 
         }
 
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> CartByUserId(int userId)
         {
@@ -58,13 +63,19 @@ namespace InstallFlow.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("items")]
+
         public async Task<IActionResult> AddCartItem(AddCartItemDto dto)
         {
-            var cartItem = await _cartService.AddCartItemAsync(dto);
-            return Ok(cartItem);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var cart = await _cartService.AddCartItemAsync(dto, userId);
+            if (cart == null) return NotFound();
+            return Ok(cart);
         }
+        
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCart(CreateCartDto dto)
         {
@@ -79,6 +90,7 @@ namespace InstallFlow.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("{id}/complete")]
         public async Task<IActionResult> CompleteCart(int id)
         {
@@ -86,13 +98,15 @@ namespace InstallFlow.Controllers
             return NoContent();
         }
 
-        [HttpPut("items/{id}")]
+        [Authorize]
+        [HttpPatch("items/{id}")]
         public async Task<IActionResult> UpdateCartItem(int id, UpdateCartItemDto dto)
         {
             await _cartService.UpdateCartItemAsync(dto, id);
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("items/{id}")]
         public async Task<IActionResult> RemoveCartItem(int id)
         {
@@ -100,6 +114,7 @@ namespace InstallFlow.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCart(int id)
         {

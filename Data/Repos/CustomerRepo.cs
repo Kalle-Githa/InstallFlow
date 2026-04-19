@@ -61,8 +61,5 @@ public class CustomerRepo : ICustomerRepo
 
     }
 
-    public Task<Customer> PatchAsync(int id, Customer customer)
-    {
-        throw new NotImplementedException();
-    }
+   
 }

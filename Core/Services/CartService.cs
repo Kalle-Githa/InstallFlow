@@ -17,9 +17,9 @@ namespace InstallFlow.Core.Services
         }
 
 
-        public async Task<CartItemDto> AddCartItemAsync(AddCartItemDto dto)
+        public async Task<CartItemDto> AddCartItemAsync(AddCartItemDto dto,int userId)
         {
-            var userId = 2; // TODO: JWT
+            
 
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart == null)

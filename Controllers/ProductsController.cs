@@ -1,5 +1,7 @@
 ﻿using InstallFlow.Core.Interfaces;
 using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstallFlow.Controllers
@@ -42,7 +44,8 @@ namespace InstallFlow.Controllers
             return Ok(product);
 
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
@@ -56,25 +59,21 @@ namespace InstallFlow.Controllers
         }
 
 
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(UpdateProductDto dto, int id)
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateProduct([FromBody]JsonPatchDocument<UpdateProductDto> dto, int id)
         {
-            await _productService.UpdateProductAsync(dto, id);
-            return NoContent();
+            var product = await _productService.UpdateProductAsync(dto, id);
+            return Ok(product);
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-
-
             await _productService.DeleteProductAsync(id);
 
             return NoContent();
         }
-
-
-
     }
 }

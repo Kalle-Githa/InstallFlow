@@ -1,5 +1,6 @@
 ﻿using InstallFlow.Core.Interfaces;
 using InstallFlow.Data.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstallFlow.Controllers
@@ -37,7 +38,8 @@ namespace InstallFlow.Controllers
             return Ok(customer);
 
         }
-
+        
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCustomer(CreateCustomerDto dto)
         {
@@ -53,7 +55,8 @@ namespace InstallFlow.Controllers
                 customer                  // Ska vara i body
             );
         }
-
+        
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -64,7 +67,8 @@ namespace InstallFlow.Controllers
             }
             return NoContent();
         }
-
+        
+        [Authorize]
         [HttpPatch("{id}")]
 
         public async Task<IActionResult> UpdateCustomer(UpdateCustomerDto dto, int id)
