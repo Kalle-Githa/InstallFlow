@@ -1,5 +1,5 @@
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Customers;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Interfaces;
 
@@ -16,7 +16,7 @@ public class CustomerService : ICustomerService
 
 
 
-    public async Task<CustomerDto> CreateCustomerAsync(CreateCustomerDto dto)
+    public async Task<CustomerDto> CreateCustomerAsync(CreateCustomerDto dto, int userId)
     {
         var customer = new Customer
         {
@@ -24,15 +24,14 @@ public class CustomerService : ICustomerService
             ContactPerson = dto.Person,
             Email = dto.Email,
             Phone = dto.Phone,
-            OrganizationNumber = dto.OrganizationNumber
+            OrganizationNumber = dto.OrganizationNumber,
+            CreatedByUserId = userId,
+            CreatedAt = DateTime.UtcNow
+
+
 
         };
         await _customerRepo.CreateAsync(customer);
-
-
-
-
-
 
         return new CustomerDto
         {
@@ -89,28 +88,15 @@ public class CustomerService : ICustomerService
 
     }
 
-    public async Task<bool> DeleteCustomerAsync(int id)
-    {
-        var customer = await _customerRepo.GetByIdAsync(id);
-        if (customer == null)
-        {
-            return false;
-        }
 
-        await _customerRepo.DeleteAsync(id);
 
-        return true;
-    }
-
-    public async Task<CustomerDto?> UpdateCustomerAsync(UpdateCustomerDto dto, int id)
+    public async Task<CustomerDto?> UpdateCustomerAsync(UpdateCustomerDto dto, int id, int userId, bool isAdmin)
     {
         var customer = await _customerRepo.GetByIdAsync(id);
 
-        if (customer == null)
-        {
-            return null;
-        }
+        if (customer == null) return null;
 
+        if (customer.CreatedByUserId != userId && !isAdmin) return null;
 
         if (dto.Company != null)
             customer.CompanyName = dto.Company;
@@ -139,5 +125,17 @@ public class CustomerService : ICustomerService
             UpdatedAt = customer.UpdatedAt
         };
 
+    }
+    public async Task<bool> DeleteCustomerAsync(int id)
+    {
+        var customer = await _customerRepo.GetByIdAsync(id);
+        if (customer == null)
+        {
+            return false;
+        }
+
+        await _customerRepo.DeleteAsync(id);
+
+        return true;
     }
 }

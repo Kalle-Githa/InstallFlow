@@ -184,6 +184,9 @@ namespace InstallFlow.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
@@ -196,7 +199,14 @@ namespace InstallFlow.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("Customers");
                 });
@@ -479,6 +489,9 @@ namespace InstallFlow.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("DefaultPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -496,17 +509,27 @@ namespace InstallFlow.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.Property<int>("Unit")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UrlSlug")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("Products");
                 });
@@ -629,6 +652,24 @@ namespace InstallFlow.Data.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("InstallFlow.Data.Entities.Customer", b =>
+                {
+                    b.HasOne("InstallFlow.Data.Entities.User", "CreatedByUser")
+                        .WithMany("CreatedCustomers")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InstallFlow.Data.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
             modelBuilder.Entity("InstallFlow.Data.Entities.Job", b =>
                 {
                     b.HasOne("InstallFlow.Data.Entities.Assignment", "Assignment")
@@ -703,6 +744,24 @@ namespace InstallFlow.Data.Migrations
                     b.Navigation("JobTemplate");
                 });
 
+            modelBuilder.Entity("InstallFlow.Data.Entities.Product", b =>
+                {
+                    b.HasOne("InstallFlow.Data.Entities.User", "CreatedByUser")
+                        .WithMany("CreatedProducts")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InstallFlow.Data.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
             modelBuilder.Entity("InstallFlow.Data.Entities.ProductCategory", b =>
                 {
                     b.HasOne("InstallFlow.Data.Entities.Category", "Category")
@@ -767,7 +826,11 @@ namespace InstallFlow.Data.Migrations
                 {
                     b.Navigation("CreatedAssignments");
 
+                    b.Navigation("CreatedCustomers");
+
                     b.Navigation("CreatedJobs");
+
+                    b.Navigation("CreatedProducts");
                 });
 #pragma warning restore 612, 618
         }

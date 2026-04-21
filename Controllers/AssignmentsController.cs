@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Assignments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InstallFlow.Controllers;
 
@@ -19,17 +19,17 @@ public class AssignmentsController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    
+
     public async Task<IActionResult> GetAllAssignments()
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var assignments = await _assignmentService.GetAllByUserIdAsync(userId);
         return Ok(assignments);
     }
-    
+
     [Authorize]
     [HttpGet("{id}")]
-    
+
     public async Task<IActionResult> GetAssignment(int id)
     {
         var assignment = await _assignmentService.GetAssignmentAsync(id);
@@ -39,7 +39,7 @@ public class AssignmentsController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    
+
     public async Task<IActionResult> CreateAssignment(CreateAssignmentDto dto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -52,11 +52,12 @@ public class AssignmentsController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id}")]
-    
+
     public async Task<IActionResult> UpdateAssignment(UpdateAssignmentDto dto, int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var assignment = await _assignmentService.UpdateAssignmentAsync(dto, id, userId);
+        var isAdmin = User.IsInRole("Admin");
+        var assignment = await _assignmentService.UpdateAssignmentAsync(dto, id, userId, isAdmin);
         if (assignment == null) return NotFound();
         return Ok(assignment);
     }
@@ -65,7 +66,9 @@ public class AssignmentsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAssignment(int id)
     {
-        var deleted = await _assignmentService.DeleteAssignmentAsync(id);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        var deleted = await _assignmentService.DeleteAssignmentAsync(id, userId, isAdmin);
         if (!deleted) return NotFound();
         return NoContent();
     }

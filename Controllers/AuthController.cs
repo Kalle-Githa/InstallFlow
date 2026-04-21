@@ -1,5 +1,5 @@
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InstallFlow.Controllers;
@@ -9,21 +9,21 @@ namespace InstallFlow.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-   private readonly IAuthService _authService;
+    private readonly IAuthService _authService;
 
-   public AuthController(IAuthService authService)
-   {
-      _authService = authService;
-   }
+    public AuthController(IAuthService authService)
+    {
+        _authService = authService;
+    }
 
-   [HttpPost]
-   public async Task<IActionResult> Login(LoginDto dto)
-   {
-      var token = await _authService.LoginAsync(dto.UserName, dto.Password);
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginDto dto)
+    {
+        var token = await _authService.LoginAsync(dto.UserName, dto.Password);
 
-      if (token == null)
-         return Unauthorized("Fel användarnamn eller lösenord");
+        if (token == null)
+            return Unauthorized("Fel användarnamn eller lösenord");
 
-      return Ok(new { token });
-   }
+        return Ok(new { token });
+    }
 }

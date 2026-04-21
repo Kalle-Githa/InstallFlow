@@ -1,16 +1,16 @@
 using InstallFlow.Core.Interfaces;
 using InstallFlow.Core.Services;
 using InstallFlow.Data;
+using InstallFlow.Data.Entities;
+using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
 using InstallFlow.Data.Repos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using System.Text;
-using InstallFlow.Data.Entities;
-using InstallFlow.Data.Enums;
-using Microsoft.OpenApi;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -106,7 +106,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider
         .GetRequiredService<InstallFlowDbContext>();
 
-    if (!context.Users.Any())
+    if (!context.Users.Any()) // TODO
     {
         context.Users.Add(new User
         {
@@ -119,6 +119,7 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
+
 
 // ===== Middleware-pipeline =====
 // Ordningen här spelar roll!

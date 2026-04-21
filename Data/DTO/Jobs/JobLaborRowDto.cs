@@ -1,0 +1,11 @@
+namespace InstallFlow.Data.DTO.Jobs;
+
+public class JobLaborRowDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public decimal Hours { get; set; }
+    public decimal HourlyRate { get; set; }
+    public decimal RowTotal => Hours * HourlyRate;
+
+}

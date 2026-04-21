@@ -1,5 +1,5 @@
 ﻿using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Cart;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
@@ -17,9 +17,9 @@ namespace InstallFlow.Core.Services
         }
 
 
-        public async Task<CartItemDto> AddCartItemAsync(AddCartItemDto dto,int userId)
+        public async Task<CartItemDto> AddCartItemAsync(AddCartItemDto dto, int userId)
         {
-            
+
 
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart == null)
@@ -61,21 +61,21 @@ namespace InstallFlow.Core.Services
 
 
 
-        public async Task<CartDto> CreateCartAsync(CreateCartDto cart)
+        public async Task<CartDto?> CreateCartAsync(CreateCartDto dto, int userId)
         {
             // Kolla om användaren redan har en aktiv cart
-            var existingCart = await _cartRepo.GetCartByUserIdAsync(cart.UserId);
+            var existingCart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (existingCart != null)
-                throw new InvalidOperationException("Användaren har redan en aktiv varukorg.");
+                return null;
 
-            if (cart.AssignmentId.HasValue && cart.JobId.HasValue)
+            if (dto.AssignmentId.HasValue && dto.JobId.HasValue)
                 throw new ArgumentException();
 
             var newCart = new Cart
             {
-                UserId = cart.UserId,
-                AssignmentId = cart.AssignmentId,
-                JobId = cart.JobId,
+                UserId = userId,
+                AssignmentId = dto.AssignmentId,
+                JobId = dto.JobId,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -92,8 +92,13 @@ namespace InstallFlow.Core.Services
                 UpdatedAt = newCart.UpdatedAt
             };
         }
-        public async Task<List<CartDto>> GetAllCartsAsync()
+        public async Task<List<CartDto>?> GetAllCartsAsync(bool isAdmin)
         {
+            if (!isAdmin) return null;
+
+
+
+
             var carts = await _cartRepo.GetAllCartsAsync();
 
             return carts.Select(cart => new CartDto

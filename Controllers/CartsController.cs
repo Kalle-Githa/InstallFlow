@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+﻿using InstallFlow.Core.Interfaces;
+using InstallFlow.Data.DTO.Cart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InstallFlow.Controllers
 {
@@ -17,12 +17,13 @@ namespace InstallFlow.Controllers
             _cartService = cartService;
         }
 
-        
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllCarts()
         {
-            var carts = await _cartService.GetAllCartsAsync();
+            var isAdmin = User.IsInRole("Admin");
+            var carts = await _cartService.GetAllCartsAsync(isAdmin);
             return Ok(carts);
         }
 
@@ -39,12 +40,9 @@ namespace InstallFlow.Controllers
             if (cart == null)
             {
                 return NotFound();
-
             }
 
-
             return Ok(cart);
-
         }
 
         [Authorize]
@@ -73,20 +71,25 @@ namespace InstallFlow.Controllers
             if (cart == null) return NotFound();
             return Ok(cart);
         }
-        
+
 
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCart(CreateCartDto dto)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
             try
             {
-                var cart = await _cartService.CreateCartAsync(dto);
+                var cart = await _cartService.CreateCartAsync(dto, userId);
+                if (cart == null)
+                    return Conflict(new { message = "Användaren har redan en aktiv varukorg." });
+
                 return CreatedAtAction(nameof(CartByUserId), new { userId = cart.UserId }, cart);
             }
-            catch (InvalidOperationException ex)
+            catch (ArgumentException)
             {
-                return Conflict(new { message = ex.Message });
+                return BadRequest(new { message = "En varukorg kan inte kopplas till både ett uppdrag och ett jobb samtidigt." });
             }
         }
 
@@ -121,16 +124,6 @@ namespace InstallFlow.Controllers
             await _cartService.DeleteCartAsync(id);
             return NoContent();
         }
-
-
-
-
-
-
-
-
-
-
 
     }
 

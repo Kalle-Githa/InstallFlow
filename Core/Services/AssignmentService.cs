@@ -1,5 +1,5 @@
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Assignments;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
@@ -22,15 +22,15 @@ public class AssignmentService : IAssignmentService
         var assignments = await _assignmentRepo.GetAllAsync();
         return assignments.Select(MapToDto).ToList();
     }
-    
-    
+
+
     public async Task<List<AssignmentDto>> GetAllByUserIdAsync(int userId)
     {
         var assignments = await _assignmentRepo.GetAllByUserIdAsync(userId);
         return assignments.Select(MapToDto).ToList();
     }
-    
-    
+
+
 
     public async Task<AssignmentDto?> GetAssignmentAsync(int id)
     {
@@ -52,7 +52,7 @@ public class AssignmentService : IAssignmentService
             Description = dto.Description,
             Address = dto.Address,
             Status = AssignmentStatus.Draft,
-            CreatedByUserId = userId,                 
+            CreatedByUserId = userId,
             CreatedAt = DateTime.Now
         };
 
@@ -64,11 +64,16 @@ public class AssignmentService : IAssignmentService
         return MapToDto(created!);
     }
 
-    public async Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId)
-    
+    public async Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId, bool isAdmin)
+
     {
         var assignment = await _assignmentRepo.GetByIdAsync(id);
-        if (assignment == null) return null;
+        if (assignment == null)
+            throw new KeyNotFoundException("Uppdrag hittades inte.");
+
+        // Kolla att det är användarens eget uppdrag
+        if (assignment.CreatedByUserId != userId && !isAdmin)
+            return null;
 
         if (dto.Name != null)
             assignment.Name = dto.Name;
@@ -80,16 +85,20 @@ public class AssignmentService : IAssignmentService
             assignment.Status = parsed;
 
         assignment.UpdatedAt = DateTime.Now;
-        assignment.UpdatedByUserId = userId;        
+        assignment.UpdatedByUserId = userId;
 
         await _assignmentRepo.SaveChangesAsync();
         return MapToDto(assignment);
     }
 
-    public async Task<bool> DeleteAssignmentAsync(int id)
+    public async Task<bool> DeleteAssignmentAsync(int id, int userId, bool isAdmin)
     {
+
         var assignment = await _assignmentRepo.GetByIdAsync(id);
         if (assignment == null) return false;
+        // Kolla att det är användarens eget uppdrag
+        if (!isAdmin && assignment.CreatedByUserId != userId)
+            return false;
 
         await _assignmentRepo.DeleteAsync(id);
         await _assignmentRepo.SaveChangesAsync();

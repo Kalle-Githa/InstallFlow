@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Jobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InstallFlow.Controllers;
 
@@ -36,15 +36,11 @@ public class JobsController : ControllerBase
 
     [Authorize]
     [HttpPost]
-   
+
     public async Task<IActionResult> CreateJob(CreateJobDto dto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        
-       
-        
-        
-        
+
         var job = await _jobService.CreateJobAsync(dto, userId);
         if (job == null)
             return BadRequest(new { error = "Assignment not found." });
@@ -61,17 +57,20 @@ public class JobsController : ControllerBase
     public async Task<IActionResult> UpdateJob(UpdateJobDto dto, int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
 
-        var job = await _jobService.UpdateJobAsync(dto, id, userId);
+        var job = await _jobService.UpdateJobAsync(dto, id, userId, isAdmin);
         if (job == null) return NotFound();
         return Ok(job);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJob(int id)
     {
+
         var deleted = await _jobService.DeleteJobAsync(id);
+
         if (!deleted) return NotFound();
         return NoContent();
     }

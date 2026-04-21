@@ -1,6 +1,8 @@
 ﻿using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Categories;
+using InstallFlow.Data.DTO.Products;
 using InstallFlow.Data.Entities;
+using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 
@@ -22,6 +24,7 @@ public class ProductService : IProductService
         Description = product.Description,
         DefaultPrice = product.DefaultPrice,
         Unit = product.Unit,
+        Type = product.Type,
         Image = product.Image,
         UrlSlug = product.UrlSlug,
         Categories = product.ProductCategories.Select(pc => new CategorySummaryDto
@@ -32,16 +35,19 @@ public class ProductService : IProductService
         }).ToList()
     };
 
-    public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
+    public async Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId)
     {
+
         var product = new Product
         {
             Name = dto.Name,
             Description = dto.Description,
             DefaultPrice = dto.DefaultPrice,
             Unit = dto.Unit,
+            Type = dto.Type,
             Image = dto.Image,
             CreatedAt = DateTime.UtcNow,
+            CreatedByUserId = userId,
             UrlSlug = dto.Name.ToLower().Replace(" ", "-"),
             ProductCategories = dto.Categories.Select(categoryId => new ProductCategory
             {
@@ -77,12 +83,22 @@ public class ProductService : IProductService
         return products.Select(MapToDto).ToList();
     }
 
-    
-    public async Task<ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id)
+    public async Task<List<ProductDto>> GetProductsByTypeAsync(ProductType type)
+    {
+        var products = await _productRepo.GetByTypeAsync(type);
+        return products.Select(MapToDto).ToList();
+    }
+
+
+    public async Task<ProductDto?> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin)
     {
         var product = await _productRepo.GetProductByIdAsync(id);
         if (product == null)
             throw new KeyNotFoundException("Produkten hittades inte.");
+        if (product.CreatedByUserId != userId && !isAdmin)
+        {
+            return null;
+        }
 
         // Steg 2: Mappa entitet → DTO
         var dto = new UpdateProductDto
@@ -111,7 +127,7 @@ public class ProductService : IProductService
         var updated = await _productRepo.GetProductByIdAsync(id);
         return MapToDto(updated!);
     }
-    
+
 
     public async Task DeleteProductAsync(int id)
     {

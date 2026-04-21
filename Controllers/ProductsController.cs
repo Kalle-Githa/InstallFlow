@@ -1,8 +1,10 @@
 ﻿using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Products;
+using InstallFlow.Data.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InstallFlow.Controllers
 {
@@ -17,13 +19,21 @@ namespace InstallFlow.Controllers
             _productService = productService;
         }
 
+
+
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts([FromQuery] string? slug)
+        public async Task<IActionResult> GetAllProducts([FromQuery] string? slug, [FromQuery] ProductType? type)
         {
             if (slug != null)
             {
                 var bySlug = await _productService.GetProductBySlugAsync(slug);
                 return Ok(bySlug);
+            }
+
+            if (type != null)
+            {
+                var byType = await _productService.GetProductsByTypeAsync(type.Value);
+                return Ok(byType);
             }
 
             var products = await _productService.GetAllProductAsync();
@@ -44,12 +54,13 @@ namespace InstallFlow.Controllers
             return Ok(product);
 
         }
-        
-        [Authorize(Roles = "Admin")]
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
-            var product = await _productService.CreateProductAsync(dto);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var product = await _productService.CreateProductAsync(dto, userId);
             return CreatedAtAction(
                 nameof(GetProduct),
                 new { id = product.Id }, product);
@@ -59,14 +70,17 @@ namespace InstallFlow.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateProduct([FromBody]JsonPatchDocument<UpdateProductDto> dto, int id)
+        public async Task<IActionResult> UpdateProduct([FromBody] JsonPatchDocument<UpdateProductDto> dto, int id)
         {
-            var product = await _productService.UpdateProductAsync(dto, id);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            var product = await _productService.UpdateProductAsync(dto, id, userId, isAdmin);
+            if (product == null) return NotFound();
             return Ok(product);
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)

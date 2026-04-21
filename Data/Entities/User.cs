@@ -12,6 +12,8 @@ namespace InstallFlow.Data.Entities
 
         public ICollection<Assignment> CreatedAssignments { get; set; } = new List<Assignment>();
         public ICollection<Job> CreatedJobs { get; set; } = new List<Job>();
+        public ICollection<Customer> CreatedCustomers { get; set; } = new List<Customer>();
+        public ICollection<Product> CreatedProducts { get; set; } = new List<Product>();
     }
 }
 

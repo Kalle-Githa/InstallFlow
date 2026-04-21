@@ -1,5 +1,5 @@
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Jobs;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
@@ -52,7 +52,7 @@ public class JobService : IJobService
             LaborMarkupValue = dto.LaborMarkupValue,
             MaterialMarkupType = ParseMarkupType(dto.MaterialMarkupType),
             MaterialMarkupValue = dto.MaterialMarkupValue,
-            CreatedByUserId = userId, 
+            CreatedByUserId = userId,
             CreatedAt = DateTime.Now,
             LaborRows = dto.LaborRows.Select(r => new JobLaborRow
             {
@@ -80,10 +80,16 @@ public class JobService : IJobService
         return MapToDto(created!);
     }
 
-    public async Task<JobDto?> UpdateJobAsync(UpdateJobDto dto, int id,int userId)
+    public async Task<JobDto?> UpdateJobAsync(UpdateJobDto dto, int id, int userId, bool isAdmin)
     {
         var job = await _jobRepo.GetByIdAsync(id);
         if (job == null) return null;
+
+        if (job.CreatedByUserId != userId && !isAdmin)
+        {
+            return null;
+        }
+
 
         if (dto.Name != null) job.Name = dto.Name;
         if (dto.Notes != null) job.Notes = dto.Notes;
@@ -99,7 +105,7 @@ public class JobService : IJobService
             job.Status = parsedStatus;
 
         job.UpdatedAt = DateTime.Now;
-        job.UpdatedByUserId = userId;  
+        job.UpdatedByUserId = userId;
 
         await _jobRepo.SaveChangesAsync();
         return MapToDto(job);
@@ -109,6 +115,8 @@ public class JobService : IJobService
     {
         var job = await _jobRepo.GetByIdAsync(id);
         if (job == null) return false;
+
+
 
         await _jobRepo.DeleteAsync(id);
         await _jobRepo.SaveChangesAsync();

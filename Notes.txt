@@ -8,3 +8,26 @@ Kör detta i din Mac:
 "ConnectionStrings": {
   "DefaultConnection": "Server=localhost,1433;Database=InstallFlowDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
 }
+
+Måste köra detta på macen SQL i den ordningen:
+DELETE FROM CartItems;
+DELETE FROM Carts;
+DELETE FROM ProductCategories;
+DELETE FROM Products;
+DELETE FROM JobLaborRows;
+DELETE FROM JobMaterialRows;
+DELETE FROM Jobs;
+DELETE FROM Assignments;
+DELETE FROM Customers;
+
+och sedan:
+dotnet ef database update
+
+Detta ska flyttas till en hemlig plats senare:
+
+"Jwt": {
+    "Key": "SuperHemligNyckelSomMåsteVaraMinst32TeckenLång!",
+    "Issuer": "InstallFlow",
+    "Audience": "InstallFlow",
+    "ExpiresInMinutes": 60
+  }

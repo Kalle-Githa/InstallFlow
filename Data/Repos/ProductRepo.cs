@@ -1,4 +1,5 @@
 ﻿using InstallFlow.Data.Entities;
+using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +35,15 @@ namespace InstallFlow.Data.Repos
                 .Include(p => p.ProductCategories)
                     .ThenInclude(pc => pc.Category)
                 .FirstOrDefaultAsync(p => p.UrlSlug == slug);
+        }
+
+        public async Task<List<Product>> GetByTypeAsync(ProductType type)
+        {
+            return await _context.Products
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .Where(p => p.Type == type)
+                .ToListAsync();
         }
 
         public async Task<Product> CreateAsync(Product product)

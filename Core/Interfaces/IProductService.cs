@@ -1,4 +1,5 @@
-﻿using InstallFlow.Data.DTO;
+﻿using InstallFlow.Data.DTO.Products;
+using InstallFlow.Data.Enums;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace InstallFlow.Core.Interfaces
@@ -8,14 +9,11 @@ namespace InstallFlow.Core.Interfaces
         Task<ProductDto?> GetProductByIdAsync(int id); // vem som helst
         Task<List<ProductDto>> GetAllProductAsync(); // vem som helst
         Task<List<ProductDto>> GetProductBySlugAsync(string product); // vem som helst
-        Task<ProductDto> CreateProductAsync(CreateProductDto product); // en tekniker eller kanske bara admin
+        Task<List<ProductDto>> GetProductsByTypeAsync(ProductType type);
+        Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId);
 
-       
+        Task<ProductDto?> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin);
         Task DeleteProductAsync(int id); // en tekniker kanske bara admin
-        Task <ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> dto, int id); // en tekniker kanske bara admin
-
-
-
 
 
     }

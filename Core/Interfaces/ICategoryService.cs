@@ -1,4 +1,4 @@
-﻿using InstallFlow.Data.DTO;
+﻿using InstallFlow.Data.DTO.Categories;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace InstallFlow.Core.Interfaces

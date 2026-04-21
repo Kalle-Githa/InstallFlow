@@ -1,7 +1,8 @@
 ﻿using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Customers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InstallFlow.Controllers
 {
@@ -16,6 +17,7 @@ namespace InstallFlow.Controllers
             _customerService = customerService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllCustomers()
         {
@@ -24,6 +26,7 @@ namespace InstallFlow.Controllers
 
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomer(int id)
         {
@@ -31,19 +34,19 @@ namespace InstallFlow.Controllers
             if (customer == null)
             {
                 return NotFound();
-
             }
-
 
             return Ok(customer);
 
         }
-        
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCustomer(CreateCustomerDto dto)
         {
-            var customer = await _customerService.CreateCustomerAsync(dto);
+
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var customer = await _customerService.CreateCustomerAsync(dto, userId);
 
             //return Created("", customer);
             //return Ok();
@@ -55,27 +58,18 @@ namespace InstallFlow.Controllers
                 customer                  // Ska vara i body
             );
         }
-        
-        [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
-        {
-            var deleted = await _customerService.DeleteCustomerAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
-            return NoContent();
-        }
-        
+
+
+
         [Authorize]
         [HttpPatch("{id}")]
 
         public async Task<IActionResult> UpdateCustomer(UpdateCustomerDto dto, int id)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
 
-
-            var customer = await _customerService.UpdateCustomerAsync(dto, id);
+            var customer = await _customerService.UpdateCustomerAsync(dto, id, userId, isAdmin);
 
             if (customer == null)
             {
@@ -85,6 +79,18 @@ namespace InstallFlow.Controllers
 
             return Ok(customer);
 
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            var deleted = await _customerService.DeleteCustomerAsync(id);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
 

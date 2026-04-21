@@ -1,5 +1,6 @@
 ﻿using InstallFlow.Core.Interfaces;
-using InstallFlow.Data.DTO;
+using InstallFlow.Data.DTO.Categories;
+using InstallFlow.Data.DTO.Products;
 using InstallFlow.Data.Entities;
 using InstallFlow.Data.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
@@ -18,13 +19,14 @@ public class CategoryService : ICategoryService
         Name = category.Name,
         Image = category.Image,
         UrlSlug = category.UrlSlug,
-        Products = category.ProductCategories.Select(pc => new ProductDto
+        Products = category.ProductCategories.Select(pc => new ProductSummaryDto
         {
             Id = pc.Product.Id,
             Name = pc.Product.Name,
             Description = pc.Product.Description,
             DefaultPrice = pc.Product.DefaultPrice,
             Unit = pc.Product.Unit,
+            Type = pc.Product.Type,
             Image = pc.Product.Image,
             UrlSlug = pc.Product.UrlSlug
         }).ToList()
@@ -76,7 +78,7 @@ public class CategoryService : ICategoryService
             Image = category.Image
 
         };
-        
+
         patchDoc.ApplyTo(dto);
 
         if (dto.Name != null) category.Name = dto.Name;

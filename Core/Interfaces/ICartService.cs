@@ -1,14 +1,14 @@
-﻿using InstallFlow.Data.DTO;
+﻿using InstallFlow.Data.DTO.Cart;
 
 namespace InstallFlow.Core.Interfaces
 {
     public interface ICartService
     {
-        Task<List<CartDto>> GetAllCartsAsync();
+        Task<List<CartDto>?> GetAllCartsAsync(bool isAdmin);
         Task<CartDto?> GetCartByIdAsync(int id);
         Task<CartDto?> GetCartByUserIdAsync(int userId);
-        Task<CartDto> CreateCartAsync(CreateCartDto cart);
-        Task<CartItemDto> AddCartItemAsync(AddCartItemDto cartItem,int userId);
+        Task<CartDto?> CreateCartAsync(CreateCartDto dto, int userId);
+        Task<CartItemDto> AddCartItemAsync(AddCartItemDto cartItem, int userId);
         Task UpdateCartItemAsync(UpdateCartItemDto dto, int id);
         Task CompleteCartAsync(int id);
         Task RemoveCartItemAsync(int id);

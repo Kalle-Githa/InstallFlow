@@ -50,6 +50,37 @@ namespace InstallFlow.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                // "Vem skapade uppdraget" — pekar på User.CreatedAssignments
+                entity.HasOne(a => a.CreatedByUser)
+                      .WithMany(u => u.CreatedCustomers)
+                      .HasForeignKey(a => a.CreatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // "Vem uppdaterade senast" — ingen collection tillbaka på User
+                entity.HasOne(a => a.UpdatedByUser)
+                      .WithMany()
+                      .HasForeignKey(a => a.UpdatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                // "Vem skapade uppdraget" — pekar på User.CreatedAssignments
+                entity.HasOne(a => a.CreatedByUser)
+                      .WithMany(u => u.CreatedProducts)
+                      .HasForeignKey(a => a.CreatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // "Vem uppdaterade senast" — ingen collection tillbaka på User
+                entity.HasOne(a => a.UpdatedByUser)
+                      .WithMany()
+                      .HasForeignKey(a => a.UpdatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
             // ===== Job → User (två relationer) =====
             // Samma mönster som ovan.
 
