@@ -16,9 +16,11 @@ public class JobRepo : IJobRepo
     public async Task<List<Job>> GetAllAsync(int? assignmentId = null)
     {
         var query = _context.Jobs
+            .AsNoTracking()
             .Include(j => j.Assignment)
             .Include(j => j.LaborRows)
             .Include(j => j.MaterialRows)
+            .AsSplitQuery()
             .AsQueryable();
 
         if (assignmentId.HasValue)
@@ -35,6 +37,7 @@ public class JobRepo : IJobRepo
             .Include(j => j.Assignment)
             .Include(j => j.LaborRows)
             .Include(j => j.MaterialRows)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 

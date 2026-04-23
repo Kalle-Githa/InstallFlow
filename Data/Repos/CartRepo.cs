@@ -21,7 +21,7 @@ namespace InstallFlow.Data.Repos
         public async Task<CartItem> AddCartItemAsync(CartItem cartItem)
         {
             await _context.CartItems.AddAsync(cartItem);
-            await _context.SaveChangesAsync();
+
             return cartItem;
         }
 
@@ -30,8 +30,6 @@ namespace InstallFlow.Data.Repos
         public async Task<Cart> CreateCartAsync(Cart cart)
         {
             await _context.Carts.AddAsync(cart);
-            await _context.SaveChangesAsync();
-
 
             return cart;
 
@@ -41,6 +39,7 @@ namespace InstallFlow.Data.Repos
         public async Task<List<Cart>> GetAllCartsAsync()
         {
             return await _context.Carts
+                .AsNoTracking()
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.Product)
                 .ToListAsync();
@@ -67,34 +66,50 @@ namespace InstallFlow.Data.Repos
 
         public async Task<CartItem?> GetCartItemByIdAsync(int id)
         {
-
             return await _context.CartItems
                 .Include(ci => ci.Product)
+                .Include(ci => ci.Cart)
                 .FirstOrDefaultAsync(ci => ci.Id == id);
         }
+
+
+        public async Task<List<Cart>> GetAllByUserIdAsync(int userId)
+        {
+            return await _context.Carts
+                .AsNoTracking()
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Product)
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+        }
+
+
 
 
 
         public async Task UpdateCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Update(cartItem);
-            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateCartAsync(Cart cart)
         {
             _context.Carts.Update(cart);
-            await _context.SaveChangesAsync();
         }
 
         public async Task RemoveCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
+
         }
         public async Task DeleteCartAsync(Cart cart)
         {
             _context.Carts.Remove(cart);
+
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _context.SaveChangesAsync();
         }
 

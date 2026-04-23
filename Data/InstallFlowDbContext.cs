@@ -52,7 +52,7 @@ namespace InstallFlow.Data
 
             modelBuilder.Entity<Customer>(entity =>
             {
-                // "Vem skapade uppdraget" — pekar på User.CreatedAssignments
+                // "Vem skapade kunden" — pekar på User.CreatedCustomers
                 entity.HasOne(a => a.CreatedByUser)
                       .WithMany(u => u.CreatedCustomers)
                       .HasForeignKey(a => a.CreatedByUserId)
@@ -68,7 +68,7 @@ namespace InstallFlow.Data
 
             modelBuilder.Entity<Product>(entity =>
             {
-                // "Vem skapade uppdraget" — pekar på User.CreatedAssignments
+                // "Vem skapade produkten" — pekar på User.CreatedProducts
                 entity.HasOne(a => a.CreatedByUser)
                       .WithMany(u => u.CreatedProducts)
                       .HasForeignKey(a => a.CreatedByUserId)
@@ -79,35 +79,40 @@ namespace InstallFlow.Data
                       .WithMany()
                       .HasForeignKey(a => a.UpdatedByUserId)
                       .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(r => r.DefaultPrice).HasPrecision(18, 2);
             });
+
+
 
             // ===== Job → User (två relationer) =====
             // Samma mönster som ovan.
 
             modelBuilder.Entity<Job>(entity =>
             {
+                // "Vem skapade jobbet" — pekar på User.CreatedJobs
                 entity.HasOne(j => j.CreatedByUser)
                       .WithMany(u => u.CreatedJobs)
                       .HasForeignKey(j => j.CreatedByUserId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+                // "Vem uppdaterade jobbet senast" — ingen collection tillbaka på User
                 entity.HasOne(j => j.UpdatedByUser)
                       .WithMany()
                       .HasForeignKey(j => j.UpdatedByUserId)
                       .OnDelete(DeleteBehavior.Restrict);
-            });
 
-            // ===== Decimal-precision =====
-            // SQL Server kräver att du anger precision för decimal,
-            // annars får du varningar vid migration.
-
-            modelBuilder.Entity<Job>(entity =>
-            {
+                // ===== Decimal-precision =====
+                // SQL Server kräver att du anger precision för decimal,
+                // annars får du varningar vid migration.
                 entity.Property(j => j.FixedCustomerPrice).HasPrecision(18, 2);
                 entity.Property(j => j.FixedInternalCost).HasPrecision(18, 2);
                 entity.Property(j => j.LaborMarkupValue).HasPrecision(18, 2);
                 entity.Property(j => j.MaterialMarkupValue).HasPrecision(18, 2);
             });
+
+
+
+
 
             modelBuilder.Entity<JobLaborRow>(entity =>
             {
@@ -141,16 +146,23 @@ namespace InstallFlow.Data
                 entity.Property(r => r.DefaultUnitPrice).HasPrecision(18, 2);
             });
 
-            modelBuilder.Entity<Product>(entity =>
-            {
 
-                entity.Property(r => r.DefaultPrice).HasPrecision(18, 2);
-            });
             modelBuilder.Entity<CartItem>(entity =>
             {
 
                 entity.Property(r => r.UnitPriceSnapshot).HasPrecision(18, 2);
             });
+            modelBuilder.Entity<Cart>()
+               .HasIndex(c => c.UserId)
+               .IsUnique()
+               .HasFilter("[Status] = 0");  // 0 = CartStatus.Active
+
+            modelBuilder.Entity<ProductCategory>()
+               .HasIndex(pc => new { pc.CategoryId, pc.ProductId })
+               .IsUnique();
+
+
+
 
 
         }

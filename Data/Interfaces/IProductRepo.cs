@@ -12,6 +12,7 @@ namespace InstallFlow.Data.Interfaces
         Task<Product?> GetBySlugAsync(string slug);
         Task UpdateAsync(Product product);
         Task DeleteAsync(int id);
+        Task SaveChangesAsync();
 
 
 

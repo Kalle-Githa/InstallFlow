@@ -30,8 +30,8 @@ public class ProductService : IProductService
         Categories = product.ProductCategories.Select(pc => new CategorySummaryDto
         {
             Id = pc.CategoryId,
-            Name = pc.Category.Name,
-            UrlSlug = pc.Category.UrlSlug
+            Name = pc.Category.Name
+
         }).ToList()
     };
 
@@ -56,8 +56,9 @@ public class ProductService : IProductService
         };
 
         await _productRepo.CreateAsync(product);
-
+        await _productRepo.SaveChangesAsync();
         var created = await _productRepo.GetProductByIdAsync(product.Id);
+
         return MapToDto(created!);
     }
 
@@ -90,15 +91,14 @@ public class ProductService : IProductService
     }
 
 
-    public async Task<ProductDto?> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin)
+    public async Task<ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin)
     {
-        var product = await _productRepo.GetProductByIdAsync(id);
-        if (product == null)
-            throw new KeyNotFoundException("Produkten hittades inte.");
+        var product = await _productRepo.GetProductByIdAsync(id)
+          ?? throw new KeyNotFoundException($"Produkt med id {id} hittades inte.");
+
         if (product.CreatedByUserId != userId && !isAdmin)
-        {
-            return null;
-        }
+            throw new UnauthorizedAccessException("Du får inte ändra andras produkter.");
+
 
         // Steg 2: Mappa entitet → DTO
         var dto = new UpdateProductDto
@@ -123,6 +123,7 @@ public class ProductService : IProductService
         product.UpdatedAt = DateTime.UtcNow;
 
         await _productRepo.UpdateAsync(product);
+        await _productRepo.SaveChangesAsync();
 
         var updated = await _productRepo.GetProductByIdAsync(id);
         return MapToDto(updated!);
@@ -131,10 +132,10 @@ public class ProductService : IProductService
 
     public async Task DeleteProductAsync(int id)
     {
-        var product = await _productRepo.GetProductByIdAsync(id);
-        if (product == null)
-            throw new KeyNotFoundException("Produkten hittades inte.");
+        var product = await _productRepo.GetProductByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Produkt med id {id} hittades inte.");
 
         await _productRepo.DeleteAsync(id);
+        await _productRepo.SaveChangesAsync();
     }
 }

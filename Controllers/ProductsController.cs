@@ -77,7 +77,7 @@ namespace InstallFlow.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var isAdmin = User.IsInRole("Admin");
             var product = await _productService.UpdateProductAsync(dto, id, userId, isAdmin);
-            if (product == null) return NotFound();
+
             return Ok(product);
         }
 

@@ -21,7 +21,9 @@ public class JobsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllJobs([FromQuery] int? assignmentId = null)
     {
-        var jobs = await _jobService.GetAllJobsAsync(assignmentId);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        var jobs = await _jobService.GetAllJobsAsync(assignmentId, userId, isAdmin);
         return Ok(jobs);
     }
 
@@ -29,7 +31,9 @@ public class JobsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetJob(int id)
     {
-        var job = await _jobService.GetJobAsync(id);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        var job = await _jobService.GetJobAsync(id, userId, isAdmin);
         if (job == null) return NotFound();
         return Ok(job);
     }
@@ -40,10 +44,7 @@ public class JobsController : ControllerBase
     public async Task<IActionResult> CreateJob(CreateJobDto dto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
         var job = await _jobService.CreateJobAsync(dto, userId);
-        if (job == null)
-            return BadRequest(new { error = "Assignment not found." });
 
         return CreatedAtAction(
             nameof(GetJob),
@@ -60,7 +61,7 @@ public class JobsController : ControllerBase
         var isAdmin = User.IsInRole("Admin");
 
         var job = await _jobService.UpdateJobAsync(dto, id, userId, isAdmin);
-        if (job == null) return NotFound();
+
         return Ok(job);
     }
 
@@ -68,10 +69,10 @@ public class JobsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJob(int id)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        await _jobService.DeleteJobAsync(id, userId, isAdmin);
 
-        var deleted = await _jobService.DeleteJobAsync(id);
-
-        if (!deleted) return NotFound();
         return NoContent();
     }
 }

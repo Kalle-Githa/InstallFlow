@@ -11,8 +11,9 @@ public class CategoryRepo : ICategoryRepo
     public async Task<List<Category>> GetAllAsync()
     {
         return await _context.Categories
+            .AsNoTracking()
             .Include(c => c.ProductCategories)
-                .ThenInclude(pc => pc.Product)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -21,7 +22,8 @@ public class CategoryRepo : ICategoryRepo
         return await _context.Categories
             .Include(c => c.ProductCategories)
                 .ThenInclude(pc => pc.Product)
-            .FirstOrDefaultAsync(c => c.Id == id);
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<Category?> GetBySlugAsync(string slug)
@@ -29,20 +31,20 @@ public class CategoryRepo : ICategoryRepo
         return await _context.Categories
             .Include(c => c.ProductCategories)
                 .ThenInclude(pc => pc.Product)
-            .FirstOrDefaultAsync(c => c.UrlSlug == slug);
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(c => c.UrlSlug == slug);
     }
 
     public async Task<Category> CreateAsync(Category category)
     {
         await _context.Categories.AddAsync(category);
-        await _context.SaveChangesAsync();
         return category;
     }
 
     public async Task UpdateAsync(Category category)
     {
         _context.Categories.Update(category);
-        await _context.SaveChangesAsync();
+
     }
 
     public async Task DeleteAsync(int id)
@@ -50,6 +52,11 @@ public class CategoryRepo : ICategoryRepo
         var category = await GetByIdAsync(id);
         if (category == null) return;
         _context.Categories.Remove(category);
+
+    }
+
+    public async Task SaveChangesAsync()
+    {
         await _context.SaveChangesAsync();
     }
 }

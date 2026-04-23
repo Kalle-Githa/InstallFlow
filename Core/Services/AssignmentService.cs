@@ -53,7 +53,7 @@ public class AssignmentService : IAssignmentService
             Address = dto.Address,
             Status = AssignmentStatus.Draft,
             CreatedByUserId = userId,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow
         };
 
         await _assignmentRepo.CreateAsync(assignment);
@@ -64,16 +64,14 @@ public class AssignmentService : IAssignmentService
         return MapToDto(created!);
     }
 
-    public async Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId, bool isAdmin)
+    public async Task<AssignmentDto> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId, bool isAdmin)
 
     {
-        var assignment = await _assignmentRepo.GetByIdAsync(id);
-        if (assignment == null)
-            throw new KeyNotFoundException("Uppdrag hittades inte.");
+        var assignment = await _assignmentRepo.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException($"Uppdraget med id {id} hittades inte.");
 
-        // Kolla att det är användarens eget uppdrag
         if (assignment.CreatedByUserId != userId && !isAdmin)
-            return null;
+            throw new UnauthorizedAccessException("Du får inte ändra andras uppdrag.");
 
         if (dto.Name != null)
             assignment.Name = dto.Name;
@@ -84,25 +82,24 @@ public class AssignmentService : IAssignmentService
         if (dto.Status != null && Enum.TryParse<AssignmentStatus>(dto.Status, out var parsed))
             assignment.Status = parsed;
 
-        assignment.UpdatedAt = DateTime.Now;
+        assignment.UpdatedAt = DateTime.UtcNow;
         assignment.UpdatedByUserId = userId;
 
         await _assignmentRepo.SaveChangesAsync();
         return MapToDto(assignment);
     }
 
-    public async Task<bool> DeleteAssignmentAsync(int id, int userId, bool isAdmin)
+    public async Task DeleteAssignmentAsync(int id, int userId, bool isAdmin)
     {
 
-        var assignment = await _assignmentRepo.GetByIdAsync(id);
-        if (assignment == null) return false;
-        // Kolla att det är användarens eget uppdrag
-        if (!isAdmin && assignment.CreatedByUserId != userId)
-            return false;
+        var assignment = await _assignmentRepo.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException($"Uppdraget med id {id} hittades inte.");
+
+        if (assignment.CreatedByUserId != userId && !isAdmin)
+            throw new UnauthorizedAccessException("Du får inte radera andras uppdrag.");
 
         await _assignmentRepo.DeleteAsync(id);
         await _assignmentRepo.SaveChangesAsync();
-        return true;
     }
 
     // ===== Privat hjälpmetod för att slippa duplicera mapping-koden =====

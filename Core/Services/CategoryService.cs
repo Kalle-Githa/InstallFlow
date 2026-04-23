@@ -12,30 +12,12 @@ public class CategoryService : ICategoryService
     private readonly ICategoryRepo _categoryRepo;
     public CategoryService(ICategoryRepo categoryRepo) => _categoryRepo = categoryRepo;
 
-    // Privat hjälpmetod — återanvänds av alla GET-metoder
-    private CategoryDto MapToDto(Category category) => new CategoryDto
-    {
-        Id = category.Id,
-        Name = category.Name,
-        Image = category.Image,
-        UrlSlug = category.UrlSlug,
-        Products = category.ProductCategories.Select(pc => new ProductSummaryDto
-        {
-            Id = pc.Product.Id,
-            Name = pc.Product.Name,
-            Description = pc.Product.Description,
-            DefaultPrice = pc.Product.DefaultPrice,
-            Unit = pc.Product.Unit,
-            Type = pc.Product.Type,
-            Image = pc.Product.Image,
-            UrlSlug = pc.Product.UrlSlug
-        }).ToList()
-    };
 
-    public async Task<List<CategoryDto>> GetAllCategoriesAsync()
+
+    public async Task<List<CategoryListDto>> GetAllCategoriesAsync()
     {
         var categories = await _categoryRepo.GetAllAsync();
-        return categories.Select(MapToDto).ToList();
+        return categories.Select(MapToListDto).ToList();
     }
 
     public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
@@ -62,6 +44,7 @@ public class CategoryService : ICategoryService
             CreatedAt = DateTime.UtcNow
         };
         await _categoryRepo.CreateAsync(category);
+        await _categoryRepo.SaveChangesAsync();
         return MapToDto(category);
     }
 
@@ -69,16 +52,10 @@ public class CategoryService : ICategoryService
 
     public async Task<CategoryDto> UpdateCategoryAsync(JsonPatchDocument<UpdateCategoryDto> patchDoc, int id)
     {
-        var category = await _categoryRepo.GetByIdAsync(id);
-        if (category == null) throw new KeyNotFoundException("Kategorin hittades inte.");
+        var category = await _categoryRepo.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Kategorin med id {id} hittades inte.");
 
-        var dto = new UpdateCategoryDto
-        {
-            Name = category.Name,
-            Image = category.Image
-
-        };
-
+        var dto = new UpdateCategoryDto { Name = category.Name, Image = category.Image };
         patchDoc.ApplyTo(dto);
 
         if (dto.Name != null) category.Name = dto.Name;
@@ -87,14 +64,48 @@ public class CategoryService : ICategoryService
         category.UpdatedAt = DateTime.UtcNow;
 
         await _categoryRepo.UpdateAsync(category);
-        var updatedCategory = await _categoryRepo.GetByIdAsync(id);
-        return MapToDto(updatedCategory!);
+        await _categoryRepo.SaveChangesAsync();  // ← direkt efter Update, inte efter GetById
+
+        var updated = await _categoryRepo.GetByIdAsync(id);
+        return MapToDto(updated!);
     }
 
     public async Task DeleteCategoryAsync(int id)
     {
-        var category = await _categoryRepo.GetByIdAsync(id);
-        if (category == null) throw new KeyNotFoundException("Kategorin hittades inte.");
+        var category = await _categoryRepo.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Kategorin med id {id} hittades inte.");
+
         await _categoryRepo.DeleteAsync(id);
+        await _categoryRepo.SaveChangesAsync();
     }
+
+    // Privat hjälpmetod — återanvänds av alla GET-metoder
+    private CategoryDto MapToDto(Category category) => new CategoryDto
+    {
+        Id = category.Id,
+        Name = category.Name,
+        Image = category.Image,
+        UrlSlug = category.UrlSlug,
+        Products = category.ProductCategories.Select(pc => new ProductSummaryDto
+        {
+            Id = pc.Product.Id,
+            Name = pc.Product.Name,
+            Description = pc.Product.Description,
+            DefaultPrice = pc.Product.DefaultPrice,
+            Unit = pc.Product.Unit,
+            Type = pc.Product.Type,
+            Image = pc.Product.Image,
+            UrlSlug = pc.Product.UrlSlug
+        }).ToList()
+    };
+
+    // För listan — bara antal produkter
+    private CategoryListDto MapToListDto(Category category) => new CategoryListDto
+    {
+        Id = category.Id,
+        Name = category.Name,
+        Image = category.Image,
+        UrlSlug = category.UrlSlug,
+        ProductCount = category.ProductCategories.Count  // ← Count istället för hela listan
+    };
 }

@@ -31,3 +31,23 @@ Detta ska flyttas till en hemlig plats senare:
     "Audience": "InstallFlow",
     "ExpiresInMinutes": 60
   }
+
+
+   // Temporär debug som läggs i author servicen
+        //Console.WriteLine($"Söker efter: '{username}'");
+        //Console.WriteLine($"Hittade användare: {user?.Username ?? "NULL"}");
+        //Console.WriteLine($"Hash i DB: {user?.PasswordHash}");
+        //var verify = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+        //Console.WriteLine($"BCrypt.Verify result: {verify}");
+        //Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("admin123"));
+
+
+Detta ska ändras senare:
+
+När du hämtar en entity via GetByIdAsync och modifierar den in-memory,
+är den redan tracked av EF. Att kalla _context.Update(entity) är överflödigt.
+Det fungerar, men det är inte idiomatisk EF.
+Kolla t.ex. CategoryService.UpdateCategoryAsync — du gör GetByIdAsync, ändrar, kallar UpdateAsync, sen SaveChangesAsync.
+Du kunde skippat UpdateAsync helt.
+
+JobTemplate är inte exponerat alls = fixas efter inlämningsuppgiften

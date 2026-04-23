@@ -19,8 +19,6 @@ namespace InstallFlow.Core.Services
 
         public async Task<CartItemDto> AddCartItemAsync(AddCartItemDto dto, int userId)
         {
-
-
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
@@ -29,25 +27,24 @@ namespace InstallFlow.Core.Services
                     UserId = userId,
                     CreatedAt = DateTime.UtcNow
                 });
+                await _cartRepo.SaveChangesAsync(); // ← spara cart så Id genereras
             }
 
-            // Hämta produkten för att snappa priset
-            var product = await _productRepo.GetProductByIdAsync(dto.ProductId);
-            if (product == null)
-                throw new KeyNotFoundException("Produkten hittades inte.");
+            var product = await _productRepo.GetProductByIdAsync(dto.ProductId)
+                ?? throw new KeyNotFoundException($"Produkt med id {dto.ProductId} hittades inte.");
 
             var cartItem = new CartItem
             {
                 CartId = cart.Id,
                 ProductId = dto.ProductId,
                 Quantity = dto.Quantity,
-                UnitPriceSnapshot = product.DefaultPrice  // snappar priset nu
+                UnitPriceSnapshot = product.DefaultPrice
             };
 
             await _cartRepo.AddCartItemAsync(cartItem);
+            await _cartRepo.SaveChangesAsync();  // ← spara så Id genereras
 
             var created = await _cartRepo.GetCartItemByIdAsync(cartItem.Id);
-
             return new CartItemDto
             {
                 Id = created!.Id,
@@ -55,7 +52,6 @@ namespace InstallFlow.Core.Services
                 ProductName = created.Product.Name,
                 Quantity = created.Quantity,
                 UnitPriceSnapshot = created.UnitPriceSnapshot
-
             };
         }
 
@@ -69,7 +65,7 @@ namespace InstallFlow.Core.Services
                 return null;
 
             if (dto.AssignmentId.HasValue && dto.JobId.HasValue)
-                throw new ArgumentException();
+                throw new ArgumentException("En varukorg får kopplas till antingen Assignment eller Job, inte båda.");
 
             var newCart = new Cart
             {
@@ -80,6 +76,7 @@ namespace InstallFlow.Core.Services
             };
 
             await _cartRepo.CreateCartAsync(newCart);
+            await _cartRepo.SaveChangesAsync();
 
             return new CartDto
             {
@@ -95,10 +92,6 @@ namespace InstallFlow.Core.Services
         public async Task<List<CartDto>?> GetAllCartsAsync(bool isAdmin)
         {
             if (!isAdmin) return null;
-
-
-
-
             var carts = await _cartRepo.GetAllCartsAsync();
 
             return carts.Select(cart => new CartDto
@@ -126,11 +119,15 @@ namespace InstallFlow.Core.Services
 
 
 
-        public async Task<CartDto?> GetCartByIdAsync(int id)
+        public async Task<CartDto?> GetCartByIdAsync(int id, int userId, bool isAdmin)
         {
+
+
             var cart = await _cartRepo.GetCartByIdAsync(id);
-            if (cart == null)
-                return null;
+            if (cart == null) return null;
+
+            if (cart.UserId != userId && !isAdmin)
+                throw new UnauthorizedAccessException("Du får inte se andras varukorgar.");
 
             var cartItem = cart.CartItems.Select(x => new CartItemDto
             {
@@ -150,6 +147,7 @@ namespace InstallFlow.Core.Services
                 JobId = cart.JobId,
                 CreatedAt = cart.CreatedAt,
                 UpdatedAt = cart.UpdatedAt,
+                Status = cart.Status,
                 CartItems = cartItem
             };
         }
@@ -157,6 +155,7 @@ namespace InstallFlow.Core.Services
 
         public async Task<CartDto?> GetCartByUserIdAsync(int userId)
         {
+
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart == null)
                 return null;
@@ -179,49 +178,84 @@ namespace InstallFlow.Core.Services
                 JobId = cart.JobId,
                 CreatedAt = cart.CreatedAt,
                 UpdatedAt = cart.UpdatedAt,
-                CartItems = cartItem
+                CartItems = cartItem,
+                Status = cart.Status
             };
         }
 
-
-
-        public async Task UpdateCartItemAsync(UpdateCartItemDto dto, int id)
+        public async Task<List<CartDto>> GetAllByUserIdAsync(int userId)
         {
-            var cartItem = await _cartRepo.GetCartItemByIdAsync(id);
-            if (cartItem == null)
-                throw new KeyNotFoundException("CartItem hittades inte.");
+            var carts = await _cartRepo.GetAllByUserIdAsync(userId);
+            return carts.Select(cart => new CartDto
+            {
+                Id = cart.Id,
+                UserId = cart.UserId,
+                AssignmentId = cart.AssignmentId,
+                JobId = cart.JobId,
+                CreatedAt = cart.CreatedAt,
+                UpdatedAt = cart.UpdatedAt,
+                Status = cart.Status,
+                CartItems = cart.CartItems.Select(x => new CartItemDto
+                {
+                    Id = x.Id,
+                    ProductId = x.ProductId,
+                    ProductName = x.Product.Name,
+                    Quantity = x.Quantity,
+                    UnitPriceSnapshot = x.UnitPriceSnapshot
+                }).ToList()
+            }).ToList();
+        }
+
+
+
+        public async Task UpdateCartItemAsync(UpdateCartItemDto dto, int id, int userId, bool isAdmin)
+        {
+            var cartItem = await _cartRepo.GetCartItemByIdAsync(id)
+                ?? throw new KeyNotFoundException($"CartItem med id {id} hittades inte.");
+
+            if (cartItem.Cart.UserId != userId && !isAdmin)
+                throw new UnauthorizedAccessException("Du får inte ändra andras varukorgs-rader.");
 
             cartItem.Quantity = dto.Quantity;
             await _cartRepo.UpdateCartItemAsync(cartItem);
+            await _cartRepo.SaveChangesAsync();
         }
 
-        public async Task CompleteCartAsync(int id)
+        public async Task CompleteCartAsync(int id, int userId, bool isAdmin)
         {
-            var cart = await _cartRepo.GetCartByIdAsync(id);
-            if (cart == null)
-                throw new KeyNotFoundException("Cart hittades inte.");
+            var cart = await _cartRepo.GetCartByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Varukorg med id {id} hittades inte.");
 
+            if (cart.UserId != userId && !isAdmin)
+                throw new UnauthorizedAccessException("Du får inte ändra andras varukorgar.");
             cart.Status = CartStatus.Completed;
             cart.UpdatedAt = DateTime.UtcNow;
             await _cartRepo.UpdateCartAsync(cart);
+            await _cartRepo.SaveChangesAsync();
         }
 
-        public async Task RemoveCartItemAsync(int id)
+        public async Task RemoveCartItemAsync(int id, int userId, bool isAdmin)
         {
-            var cartItem = await _cartRepo.GetCartItemByIdAsync(id);
-            if (cartItem == null)
-                throw new KeyNotFoundException("CartItem hittades inte.");
+            var cartItem = await _cartRepo.GetCartItemByIdAsync(id)
+                ?? throw new KeyNotFoundException($"CartItem med id {id} hittades inte.");
+
+            if (cartItem.Cart.UserId != userId && !isAdmin)
+                throw new UnauthorizedAccessException("Du får inte ta bort andras varukorgs-rader.");
 
             await _cartRepo.RemoveCartItemAsync(cartItem);
+            await _cartRepo.SaveChangesAsync();
         }
 
-        public async Task DeleteCartAsync(int id)
-        {
-            var cart = await _cartRepo.GetCartByIdAsync(id);
-            if (cart == null)
-                throw new KeyNotFoundException("Cart hittades inte.");
 
+        public async Task DeleteCartAsync(int id, int userId, bool isAdmin)
+        {
+            var cart = await _cartRepo.GetCartByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Varukorg med id {id} hittades inte.");
+
+            if (cart.UserId != userId && !isAdmin)
+                throw new UnauthorizedAccessException("Du får inte radera andras varukorgar.");
             await _cartRepo.DeleteCartAsync(cart);
+            await _cartRepo.SaveChangesAsync();
         }
     }
 }

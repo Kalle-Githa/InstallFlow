@@ -12,8 +12,8 @@ namespace InstallFlow.Core.Interfaces
         Task<List<ProductDto>> GetProductsByTypeAsync(ProductType type);
         Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId);
 
-        Task<ProductDto?> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin);
-        Task DeleteProductAsync(int id); // en tekniker kanske bara admin
+        Task<ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin);
+        Task DeleteProductAsync(int id);
 
 
     }

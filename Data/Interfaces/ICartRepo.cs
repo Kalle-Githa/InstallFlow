@@ -8,11 +8,13 @@ namespace InstallFlow.Data.Interfaces
         Task<Cart?> GetCartByIdAsync(int id);
         Task<Cart?> GetCartByUserIdAsync(int userId);
         Task<CartItem?> GetCartItemByIdAsync(int id);
+        Task<List<Cart>> GetAllByUserIdAsync(int userId);
         Task<Cart> CreateCartAsync(Cart cart);
         Task<CartItem> AddCartItemAsync(CartItem cartItem);
         Task UpdateCartItemAsync(CartItem cartItem);
         Task UpdateCartAsync(Cart cart);
         Task RemoveCartItemAsync(CartItem cartItem);
         Task DeleteCartAsync(Cart cart);
+        Task SaveChangesAsync();
     }
 }

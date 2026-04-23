@@ -1,10 +1,9 @@
 using InstallFlow.Core.Interfaces;
 using InstallFlow.Core.Services;
 using InstallFlow.Data;
-using InstallFlow.Data.Entities;
-using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
 using InstallFlow.Data.Repos;
+using InstallFlow.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -97,32 +96,35 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 
 var app = builder.Build();
+
 // ===== Seed testanvändare =====
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider
-        .GetRequiredService<InstallFlowDbContext>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider
+//        .GetRequiredService<InstallFlowDbContext>();
 
-    if (!context.Users.Any()) // TODO
-    {
-        context.Users.Add(new User
-        {
-            Username = "admin",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-            Role = UserRole.Admin,
-            CreatedAt = DateTime.UtcNow
-        });
+//    if (!context.Users.Any()) // TODO
+//    {
+//        context.Users.Add(new User
+//        {
+//            Username = "admin",
+//            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+//            Role = UserRole.Admin,
+//            CreatedAt = DateTime.UtcNow
+//        });
 
-        context.SaveChanges();
-    }
-}
+//        context.SaveChanges();
+//    }
+//}
 
 
 // ===== Middleware-pipeline =====
 // Ordningen här spelar roll!
+app.UseMiddleware<ExceptionMiddleware>();  // ← ÖVERST — fångar allt nedanför
 
 if (app.Environment.IsDevelopment())
 {

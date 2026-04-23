@@ -71,11 +71,7 @@ namespace InstallFlow.Controllers
 
             var customer = await _customerService.UpdateCustomerAsync(dto, id, userId, isAdmin);
 
-            if (customer == null)
-            {
-                return NotFound();
 
-            }
 
             return Ok(customer);
 
@@ -85,18 +81,10 @@ namespace InstallFlow.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var deleted = await _customerService.DeleteCustomerAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
+            await _customerService.DeleteCustomerAsync(id);
+
             return NoContent();
         }
-
-
-
-
-
 
     }
 }

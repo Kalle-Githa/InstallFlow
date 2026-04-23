@@ -29,37 +29,44 @@ namespace InstallFlow.Controllers
 
 
 
-
-
-
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> Cart(int id)
         {
-            var cart = await _cartService.GetCartByIdAsync(id);
-            if (cart == null)
-            {
-                return NotFound();
-            }
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            var cart = await _cartService.GetCartByIdAsync(id, userId, isAdmin);
+            if (cart == null) return NotFound();
+
 
             return Ok(cart);
         }
+
+
+
 
         [Authorize]
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> CartByUserId(int userId)
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyCart()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cart = await _cartService.GetCartByUserIdAsync(userId);
-            if (cart == null)
-            {
-                return NotFound();
-
-            }
-
+            if (cart == null) return NotFound();
 
             return Ok(cart);
 
         }
+
+
+        [Authorize]
+        [HttpGet("me/history")]
+        public async Task<IActionResult> GetMyHistory()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var carts = await _cartService.GetAllByUserIdAsync(userId);
+            return Ok(carts);
+        }
+
 
         [Authorize]
         [HttpPost("items")]
@@ -68,7 +75,7 @@ namespace InstallFlow.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cart = await _cartService.AddCartItemAsync(dto, userId);
-            if (cart == null) return NotFound();
+
             return Ok(cart);
         }
 
@@ -79,25 +86,20 @@ namespace InstallFlow.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            try
-            {
-                var cart = await _cartService.CreateCartAsync(dto, userId);
-                if (cart == null)
-                    return Conflict(new { message = "Användaren har redan en aktiv varukorg." });
+            var cart = await _cartService.CreateCartAsync(dto, userId);
+            if (cart == null)
+                return Conflict(new { message = "Användaren har redan en aktiv varukorg." });
 
-                return CreatedAtAction(nameof(CartByUserId), new { userId = cart.UserId }, cart);
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest(new { message = "En varukorg kan inte kopplas till både ett uppdrag och ett jobb samtidigt." });
-            }
+            return CreatedAtAction(nameof(GetMyCart), null, cart);
         }
 
         [Authorize]
         [HttpPost("{id}/complete")]
         public async Task<IActionResult> CompleteCart(int id)
         {
-            await _cartService.CompleteCartAsync(id);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            await _cartService.CompleteCartAsync(id, userId, isAdmin);
             return NoContent();
         }
 
@@ -105,15 +107,20 @@ namespace InstallFlow.Controllers
         [HttpPatch("items/{id}")]
         public async Task<IActionResult> UpdateCartItem(int id, UpdateCartItemDto dto)
         {
-            await _cartService.UpdateCartItemAsync(dto, id);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            await _cartService.UpdateCartItemAsync(dto, id, userId, isAdmin);
             return NoContent();
         }
+
 
         [Authorize]
         [HttpDelete("items/{id}")]
         public async Task<IActionResult> RemoveCartItem(int id)
         {
-            await _cartService.RemoveCartItemAsync(id);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            await _cartService.RemoveCartItemAsync(id, userId, isAdmin);
             return NoContent();
         }
 
@@ -121,7 +128,9 @@ namespace InstallFlow.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCart(int id)
         {
-            await _cartService.DeleteCartAsync(id);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var isAdmin = User.IsInRole("Admin");
+            await _cartService.DeleteCartAsync(id, userId, isAdmin);
             return NoContent();
         }
 

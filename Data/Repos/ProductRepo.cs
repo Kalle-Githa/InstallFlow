@@ -16,6 +16,7 @@ namespace InstallFlow.Data.Repos
         public async Task<List<Product>> GetAllAsync()
         {
             return await _context.Products
+                .AsNoTracking()
                 .Include(p => p.ProductCategories)
                     .ThenInclude(pc => pc.Category)
                 .ToListAsync();
@@ -49,14 +50,12 @@ namespace InstallFlow.Data.Repos
         public async Task<Product> CreateAsync(Product product)
         {
             await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
             return product;
         }
 
         public async Task UpdateAsync(Product product)
         {
             _context.Products.Update(product);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
@@ -65,6 +64,10 @@ namespace InstallFlow.Data.Repos
             if (product == null) return;
 
             _context.Products.Remove(product);
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _context.SaveChangesAsync();
         }
 

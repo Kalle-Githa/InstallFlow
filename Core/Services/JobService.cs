@@ -17,26 +17,39 @@ public class JobService : IJobService
         _assignmentRepo = assignmentRepo;
     }
 
-    public async Task<List<JobDto>> GetAllJobsAsync(int? assignmentId = null)
+    public async Task<List<JobDto>> GetAllJobsAsync(int? assignmentId, int userId, bool isAdmin)
     {
         var jobs = await _jobRepo.GetAllAsync(assignmentId);
+
+        if (!isAdmin)
+            jobs = jobs.Where(j => j.CreatedByUserId == userId).ToList();
+
         return jobs.Select(MapToDto).ToList();
     }
 
-    public async Task<JobDto?> GetJobAsync(int id)
+    public async Task<JobDto?> GetJobAsync(int id, int userId, bool isAdmin)
     {
         var job = await _jobRepo.GetByIdAsync(id);
         if (job == null) return null;
+
+        if (job.CreatedByUserId != userId && !isAdmin)
+            throw new UnauthorizedAccessException("Du får inte se andras jobb.");
+
         return MapToDto(job);
     }
 
-    public async Task<JobDto?> CreateJobAsync(CreateJobDto dto, int userId)
+    public async Task<JobDto> CreateJobAsync(CreateJobDto dto, int userId)
     {
         // Om assignmentId är satt, kolla att det faktiskt finns
         if (dto.AssignmentId.HasValue)
         {
-            var assignment = await _assignmentRepo.GetByIdAsync(dto.AssignmentId.Value);
-            if (assignment == null) return null;
+            var assignment = await _assignmentRepo.GetByIdAsync(dto.AssignmentId.Value)
+                ?? throw new KeyNotFoundException($"Uppdraget med id {dto.AssignmentId} hittades inte.");
+
+            if (assignment.Status != AssignmentStatus.Active)
+                throw new InvalidOperationException(
+                    $"Jobb kan bara läggas till på aktiva uppdrag. " +
+                    $"Uppdragets status är '{assignment.Status}'.");
         }
 
         var job = new Job
@@ -53,7 +66,7 @@ public class JobService : IJobService
             MaterialMarkupType = ParseMarkupType(dto.MaterialMarkupType),
             MaterialMarkupValue = dto.MaterialMarkupValue,
             CreatedByUserId = userId,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             LaborRows = dto.LaborRows.Select(r => new JobLaborRow
             {
                 Name = r.Name,
@@ -75,20 +88,19 @@ public class JobService : IJobService
         await _jobRepo.CreateAsync(job);
         await _jobRepo.SaveChangesAsync();
 
-        // Hämta om med alla includes så mapping blir komplett
+
         var created = await _jobRepo.GetByIdAsync(job.Id);
         return MapToDto(created!);
     }
 
-    public async Task<JobDto?> UpdateJobAsync(UpdateJobDto dto, int id, int userId, bool isAdmin)
+    public async Task<JobDto> UpdateJobAsync(UpdateJobDto dto, int id, int userId, bool isAdmin)
     {
-        var job = await _jobRepo.GetByIdAsync(id);
-        if (job == null) return null;
+        var job = await _jobRepo.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException($"Jobb med id {id} hittades inte.");
 
         if (job.CreatedByUserId != userId && !isAdmin)
-        {
-            return null;
-        }
+            throw new UnauthorizedAccessException("Du får inte ändra andras jobb.");
+
 
 
         if (dto.Name != null) job.Name = dto.Name;
@@ -104,23 +116,25 @@ public class JobService : IJobService
         if (dto.Status != null && Enum.TryParse<JobStatus>(dto.Status, out var parsedStatus))
             job.Status = parsedStatus;
 
-        job.UpdatedAt = DateTime.Now;
+        job.UpdatedAt = DateTime.UtcNow;
         job.UpdatedByUserId = userId;
 
         await _jobRepo.SaveChangesAsync();
         return MapToDto(job);
     }
 
-    public async Task<bool> DeleteJobAsync(int id)
+    public async Task DeleteJobAsync(int id, int userId, bool isAdmin)
     {
-        var job = await _jobRepo.GetByIdAsync(id);
-        if (job == null) return false;
+        var job = await _jobRepo.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException($"Jobb med id {id} hittades inte.");
 
+        if (job.CreatedByUserId != userId && !isAdmin)
+            throw new UnauthorizedAccessException("Du får inte radera andras jobb.");
 
 
         await _jobRepo.DeleteAsync(id);
         await _jobRepo.SaveChangesAsync();
-        return true;
+
     }
 
     // ===== Privat mapping + beräkningar =====

@@ -17,10 +17,11 @@ public class AssignmentRepo : IAssignmentRepo
     public async Task<List<Assignment>> GetAllAsync()
     {
         return await _context.Assignments
+            .AsNoTracking()
             .Include(a => a.Customer)      // ← hämta kunden med, för CustomerName
             .ToListAsync();
     }
-    
+
     public async Task<List<Assignment>> GetAllByUserIdAsync(int userId)
     {
         return await _context.Assignments

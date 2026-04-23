@@ -32,6 +32,7 @@ public class CustomerService : ICustomerService
 
         };
         await _customerRepo.CreateAsync(customer);
+        await _customerRepo.SaveChangesAsync();
 
         return new CustomerDto
         {
@@ -90,13 +91,13 @@ public class CustomerService : ICustomerService
 
 
 
-    public async Task<CustomerDto?> UpdateCustomerAsync(UpdateCustomerDto dto, int id, int userId, bool isAdmin)
+    public async Task<CustomerDto> UpdateCustomerAsync(UpdateCustomerDto dto, int id, int userId, bool isAdmin)
     {
-        var customer = await _customerRepo.GetByIdAsync(id);
+        var customer = await _customerRepo.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException($"Kunden med id {id} hittades inte.");
 
-        if (customer == null) return null;
-
-        if (customer.CreatedByUserId != userId && !isAdmin) return null;
+        if (customer.CreatedByUserId != userId && !isAdmin)
+            throw new UnauthorizedAccessException("Du får inte ändra andras kunder.");
 
         if (dto.Company != null)
             customer.CompanyName = dto.Company;
@@ -109,11 +110,12 @@ public class CustomerService : ICustomerService
         if (dto.OrganizationNumber != null)
             customer.OrganizationNumber = dto.OrganizationNumber;
 
-        customer.UpdatedAt = DateTime.Now;
+        customer.UpdatedAt = DateTime.UtcNow;
+        customer.UpdatedByUserId = userId;
 
-        await _customerRepo.UpdateAsync(id, customer);
+        await _customerRepo.UpdateAsync(customer);
 
-
+        await _customerRepo.SaveChangesAsync();
         return new CustomerDto
         {
             Id = id,
@@ -126,16 +128,13 @@ public class CustomerService : ICustomerService
         };
 
     }
-    public async Task<bool> DeleteCustomerAsync(int id)
+    public async Task DeleteCustomerAsync(int id)
     {
-        var customer = await _customerRepo.GetByIdAsync(id);
-        if (customer == null)
-        {
-            return false;
-        }
+        var customer = await _customerRepo.GetByIdAsync(id)
+         ?? throw new KeyNotFoundException($"Kunden med id {id} hittades inte.");
 
         await _customerRepo.DeleteAsync(id);
+        await _customerRepo.SaveChangesAsync();
 
-        return true;
     }
 }

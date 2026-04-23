@@ -8,8 +8,8 @@ public interface IAssignmentService
     Task<AssignmentDto?> GetAssignmentAsync(int id);
     Task<List<AssignmentDto>> GetAllByUserIdAsync(int userId);
     Task<AssignmentDto?> CreateAssignmentAsync(CreateAssignmentDto dto, int userId);
-    Task<AssignmentDto?> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId, bool isAdmin);
-    Task<bool> DeleteAssignmentAsync(int id, int userId, bool isAdmin);
+    Task<AssignmentDto> UpdateAssignmentAsync(UpdateAssignmentDto dto, int id, int userId, bool isAdmin);
+    Task DeleteAssignmentAsync(int id, int userId, bool isAdmin);
 
 
 

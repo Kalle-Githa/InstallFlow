@@ -58,7 +58,7 @@ public class AssignmentsController : ControllerBase
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isAdmin = User.IsInRole("Admin");
         var assignment = await _assignmentService.UpdateAssignmentAsync(dto, id, userId, isAdmin);
-        if (assignment == null) return NotFound();
+
         return Ok(assignment);
     }
 
@@ -68,8 +68,8 @@ public class AssignmentsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isAdmin = User.IsInRole("Admin");
-        var deleted = await _assignmentService.DeleteAssignmentAsync(id, userId, isAdmin);
-        if (!deleted) return NotFound();
+        await _assignmentService.DeleteAssignmentAsync(id, userId, isAdmin);
+
         return NoContent();
     }
 }

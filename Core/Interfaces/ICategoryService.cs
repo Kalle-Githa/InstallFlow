@@ -5,12 +5,12 @@ namespace InstallFlow.Core.Interfaces
 {
     public interface ICategoryService
     {
-        Task<List<CategoryDto>> GetAllCategoriesAsync();
+        Task<List<CategoryListDto>> GetAllCategoriesAsync();
         Task<CategoryDto?> GetCategoryByIdAsync(int id);
         Task<List<CategoryDto>> GetCategoryBySlugAsync(string slug);
         Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto);
         Task<CategoryDto> UpdateCategoryAsync(JsonPatchDocument<UpdateCategoryDto> patchDoc, int id);
-
         Task DeleteCategoryAsync(int id);
+
     }
 }

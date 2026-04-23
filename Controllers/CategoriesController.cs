@@ -37,7 +37,9 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> Create(CreateCategoryDto dto)
     {
         var category = await _categoryService.CreateCategoryAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = category.Id }, category);
     }
 
     [Authorize(Roles = "Admin")]
@@ -45,6 +47,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> UpdateCategory([FromBody] JsonPatchDocument<UpdateCategoryDto> patchDoc, int id)
     {
         var category = await _categoryService.UpdateCategoryAsync(patchDoc, id);
+
         return Ok(category);
     }
 

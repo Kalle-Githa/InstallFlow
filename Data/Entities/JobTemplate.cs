@@ -13,10 +13,10 @@ namespace InstallFlow.Data.Entities
         public decimal? FixedCustomerPrice { get; set; }
         public decimal? FixedInternalCost { get; set; }
 
-        public MarkupType LaborMarkupType { get; set; } = MarkupType.Percent;
+        public MarkupType LaborMarkupType { get; set; } = MarkupType.None;
         public decimal? LaborMarkupValue { get; set; }
 
-        public MarkupType MaterialMarkupType { get; set; } = MarkupType.Percent;
+        public MarkupType MaterialMarkupType { get; set; } = MarkupType.None;
         public decimal? MaterialMarkupValue { get; set; }
 
         public bool IsActive { get; set; }

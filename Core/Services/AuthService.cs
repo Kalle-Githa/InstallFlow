@@ -1,6 +1,7 @@
 using InstallFlow.Core.Interfaces;
-using InstallFlow.Data;
-using Microsoft.EntityFrameworkCore;
+using InstallFlow.Data.DTO.Auth;
+using InstallFlow.Data.Entities;
+using InstallFlow.Data.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,32 +11,21 @@ namespace InstallFlow.Core.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly InstallFlowDbContext _context;
+    private readonly IUserRepo _userRepo;
     private readonly IConfiguration _configuration;
 
-    public AuthService(InstallFlowDbContext context, IConfiguration configuration)
+    public AuthService(IUserRepo userRepo, IConfiguration configuration)
     {
-        _context = context;
+        _userRepo = userRepo;
         _configuration = configuration;
     }
 
     public async Task<string?> LoginAsync(string username, string password)
     {
         // Steg 1: Hämta användaren
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == username);
-
-        // Temporär debug
-        //Console.WriteLine($"Söker efter: '{username}'");
-        //Console.WriteLine($"Hittade användare: {user?.Username ?? "NULL"}");
-        //Console.WriteLine($"Hash i DB: {user?.PasswordHash}");
-        //var verify = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
-        //Console.WriteLine($"BCrypt.Verify result: {verify}");
-        //Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("admin123"));
-
-
-
+        var user = await _userRepo.GetByUsernameAsync(username);
         if (user == null) return null;
+
 
         // Steg 2: Verifiera lösenordet
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
@@ -54,12 +44,12 @@ public class AuthService : IAuthService
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
         var signingCreds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        var expiresInMinutes = int.Parse(_configuration["Jwt:ExpiresInMinutes"] ?? "60");
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(expiresInMinutes),
             signingCredentials: signingCreds
         );
 
@@ -69,5 +59,31 @@ public class AuthService : IAuthService
 
     }
 
+    public async Task<UserDto> CreateUserAsync(CreateUserDto dto)
+    {
+        var existing = await _userRepo.GetByUsernameAsync(dto.Username);
+        if (existing != null)
+            throw new InvalidOperationException($"Användarnamnet '{dto.Username}' är redan taget.");
 
+        var user = new User
+        {
+            Username = dto.Username,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            Role = dto.Role,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _userRepo.CreateAsync(user);
+        await _userRepo.SaveChangesAsync();
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Role = user.Role,
+            CreatedAt = user.CreatedAt
+        };
+    }
 }
+
+
