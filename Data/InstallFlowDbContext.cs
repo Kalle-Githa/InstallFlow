@@ -24,7 +24,7 @@ namespace InstallFlow.Data
         public DbSet<CartItem> CartItems => Set<CartItem>();
 
 
-
+        
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -165,6 +165,8 @@ namespace InstallFlow.Data
 
 
 
+
+            
         }
     }
 }

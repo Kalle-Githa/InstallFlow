@@ -64,6 +64,7 @@ public class ProductService : IProductService
 
     public async Task<List<ProductDto>> GetProductBySlugAsync(string slug)
     {
+
         var product = await _productRepo.GetBySlugAsync(slug);
         if (product == null) return new List<ProductDto>();
 
@@ -75,12 +76,18 @@ public class ProductService : IProductService
         var product = await _productRepo.GetProductByIdAsync(id);
         if (product == null) return null;
 
+
         return MapToDto(product);
     }
 
-    public async Task<List<ProductDto>> GetAllProductAsync()
+    public async Task<List<ProductDto>> GetAllProductAsync(int page, int pageSize)
     {
-        var products = await _productRepo.GetAllAsync();
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+
+
+
+        var products = await _productRepo.GetAllAsync(page, pageSize);
         return products.Select(MapToDto).ToList();
     }
 

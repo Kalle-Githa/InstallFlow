@@ -13,12 +13,14 @@ namespace InstallFlow.Data.Repos
             _context = context;
         }
 
-        public async Task<List<Product>> GetAllAsync()
+        public async Task<List<Product>> GetAllAsync(int page, int pageSize)
         {
             return await _context.Products
                 .AsNoTracking()
                 .Include(p => p.ProductCategories)
                     .ThenInclude(pc => pc.Category)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                 .ToListAsync();
         }
 

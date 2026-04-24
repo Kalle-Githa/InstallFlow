@@ -7,7 +7,7 @@ namespace InstallFlow.Core.Interfaces
     public interface IProductService
     {
         Task<ProductDto?> GetProductByIdAsync(int id); // vem som helst
-        Task<List<ProductDto>> GetAllProductAsync(); // vem som helst
+        Task<List<ProductDto>> GetAllProductAsync(int page, int pageSize); // vem som helst
         Task<List<ProductDto>> GetProductBySlugAsync(string product); // vem som helst
         Task<List<ProductDto>> GetProductsByTypeAsync(ProductType type);
         Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId);

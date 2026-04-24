@@ -23,7 +23,10 @@ public class AssignmentsController : ControllerBase
     public async Task<IActionResult> GetAllAssignments()
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var assignments = await _assignmentService.GetAllByUserIdAsync(userId);
+        var isAdmin = User.IsInRole("Admin");
+        var assignments = isAdmin
+       ? await _assignmentService.GetAllAssignmentsAsync()
+       : await _assignmentService.GetAllByUserIdAsync(userId);
         return Ok(assignments);
     }
 

@@ -7,7 +7,7 @@ namespace InstallFlow.Data.Entities
         public int Id { get; set; }
 
         public int? AssignmentId { get; set; }
-        public Assignment? Assignment { get; set; } 
+        public Assignment? Assignment { get; set; }
 
         public int? JobTemplateId { get; set; }
         public JobTemplate? JobTemplate { get; set; }
@@ -26,10 +26,10 @@ namespace InstallFlow.Data.Entities
         public decimal? FixedCustomerPrice { get; set; }
         public decimal? FixedInternalCost { get; set; }
 
-        public MarkupType LaborMarkupType { get; set; } = MarkupType.None;
+        public MarkupType LaborMarkupType { get; set; } = MarkupType.Percent;
         public decimal? LaborMarkupValue { get; set; }
 
-        public MarkupType MaterialMarkupType { get; set; } = MarkupType.None;
+        public MarkupType MaterialMarkupType { get; set; } = MarkupType.Percent;
         public decimal? MaterialMarkupValue { get; set; }
 
         public DateTime CreatedAt { get; set; }

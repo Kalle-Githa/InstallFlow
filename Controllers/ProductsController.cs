@@ -22,7 +22,7 @@ namespace InstallFlow.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts([FromQuery] string? slug, [FromQuery] ProductType? type)
+        public async Task<IActionResult> GetAllProducts([FromQuery] string? slug, [FromQuery] ProductType? type, int page = 1, int pageSize = 10)
         {
             if (slug != null)
             {
@@ -36,7 +36,8 @@ namespace InstallFlow.Controllers
                 return Ok(byType);
             }
 
-            var products = await _productService.GetAllProductAsync();
+            var products = await _productService.GetAllProductAsync(page, pageSize);
+
             return Ok(products);
         }
 
