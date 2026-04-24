@@ -10,6 +10,7 @@ namespace InstallFlow.Core.Interfaces
         Task<List<CategoryDto>> GetCategoryBySlugAsync(string slug);
         Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto);
         Task<CategoryDto> UpdateCategoryAsync(JsonPatchDocument<UpdateCategoryDto> patchDoc, int id);
+        Task RemoveProductFromCategoryAsync(int categoryId, int productId);
         Task DeleteCategoryAsync(int id);
 
     }

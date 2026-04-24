@@ -10,6 +10,7 @@ namespace InstallFlow.Data.Interfaces
         Task<Category> CreateAsync(Category category);
         Task UpdateAsync(Category category);
         Task DeleteAsync(int id);
+        Task RemoveProductAsync(int categoryId, int productId);
         Task SaveChangesAsync();
     }
 }

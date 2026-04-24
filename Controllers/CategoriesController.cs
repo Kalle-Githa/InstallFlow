@@ -52,6 +52,14 @@ public class CategoriesController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
+    [HttpDelete("{categoryId}/products/{productId}")]
+    public async Task<IActionResult> RemoveProductFromCategory(int categoryId, int productId)
+    {
+        await _categoryService.RemoveProductFromCategoryAsync(categoryId, productId);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

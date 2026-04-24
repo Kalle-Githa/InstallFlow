@@ -70,6 +70,15 @@ public class CategoryService : ICategoryService
         return MapToDto(updated!);
     }
 
+    public async Task RemoveProductFromCategoryAsync(int categoryId, int productId)
+    {
+        var category = await _categoryRepo.GetByIdAsync(categoryId)
+            ?? throw new KeyNotFoundException($"Kategorin med id {categoryId} hittades inte.");
+
+        await _categoryRepo.RemoveProductAsync(categoryId, productId);
+        await _categoryRepo.SaveChangesAsync();
+    }
+
     public async Task DeleteCategoryAsync(int id)
     {
         var category = await _categoryRepo.GetByIdAsync(id)

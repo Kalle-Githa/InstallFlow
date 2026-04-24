@@ -47,6 +47,15 @@ public class CategoryRepo : ICategoryRepo
 
     }
 
+    public async Task RemoveProductAsync(int categoryId, int productId)
+    {
+        var link = await _context.ProductCategories
+            .FirstOrDefaultAsync(pc => pc.CategoryId == categoryId && pc.ProductId == productId);
+
+        if (link == null) return;
+        _context.ProductCategories.Remove(link);
+    }
+
     public async Task DeleteAsync(int id)
     {
         var category = await GetByIdAsync(id);
