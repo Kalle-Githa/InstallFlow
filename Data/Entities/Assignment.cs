@@ -1,4 +1,6 @@
-﻿using InstallFlow.Data.Enums;
+﻿// Assignment.cs
+using InstallFlow.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace InstallFlow.Data.Entities
 {
@@ -15,15 +17,20 @@ namespace InstallFlow.Data.Entities
         public int? UpdatedByUserId { get; set; }
         public User? UpdatedByUser { get; set; }
 
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; } = null!;
+
+        [MaxLength(1000)]
         public string? Description { get; set; }
+
+        [MaxLength(300)]
         public string? Address { get; set; }
+
         public AssignmentStatus Status { get; set; } = AssignmentStatus.Draft;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
         public ICollection<Job> Jobs { get; set; } = new List<Job>();
-
-
     }
 }

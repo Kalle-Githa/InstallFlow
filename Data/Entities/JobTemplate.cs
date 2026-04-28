@@ -1,12 +1,22 @@
-﻿using InstallFlow.Data.Enums;
+﻿// JobTemplate.cs
+using InstallFlow.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace InstallFlow.Data.Entities
 {
     public class JobTemplate
     {
         public int Id { get; set; }
+
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; } = null!;
+
+        [MaxLength(1000)]
         public string? Description { get; set; }
+
+        [Required]
+        [MaxLength(100)]
         public string JobType { get; set; } = null!;
 
         public bool IsFixedPrice { get; set; }

@@ -71,7 +71,7 @@ builder.Services.AddOpenApi(options =>
             [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
         };
 
-        foreach (var operation in document.Paths.Values.SelectMany(p => p.Operations))
+        foreach (var operation in document.Paths.Values.SelectMany(p => p.Operations!))
         {
             operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
             operation.Value.Security.Add(requirement);
@@ -101,25 +101,7 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 var app = builder.Build();
 
-// ===== Seed testanvändare =====
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider
-//        .GetRequiredService<InstallFlowDbContext>();
 
-//    if (!context.Users.Any()) // TODO
-//    {
-//        context.Users.Add(new User
-//        {
-//            Username = "admin",
-//            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-//            Role = UserRole.Admin,
-//            CreatedAt = DateTime.UtcNow
-//        });
-
-//        context.SaveChanges();
-//    }
-//}
 
 
 // ===== Middleware-pipeline =====

@@ -9,7 +9,7 @@ Kör detta i din Mac:
   "DefaultConnection": "Server=localhost,1433;Database=InstallFlowDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
 }
 
-Måste köra detta på macen SQL i den ordningen:
+Måste köra detta på macen SQL i den ordningen om man vill rensa tabellerna:
 DELETE FROM CartItems;
 DELETE FROM Carts;
 DELETE FROM ProductCategories;
@@ -23,14 +23,7 @@ DELETE FROM Customers;
 och sedan:
 dotnet ef database update
 
-Detta ska flyttas till en hemlig plats senare:
 
-"Jwt": {
-    "Key": "SuperHemligNyckelSomMåsteVaraMinst32TeckenLång!",
-    "Issuer": "InstallFlow",
-    "Audience": "InstallFlow",
-    "ExpiresInMinutes": 60
-  }
 
 
    // Temporär debug som läggs i author servicen
@@ -42,12 +35,28 @@ Detta ska flyttas till en hemlig plats senare:
         //Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("admin123"));
 
 
-Detta ska ändras senare:
 
-När du hämtar en entity via GetByIdAsync och modifierar den in-memory,
-är den redan tracked av EF. Att kalla _context.Update(entity) är överflödigt.
-Det fungerar, men det är inte idiomatisk EF.
-Kolla t.ex. CategoryService.UpdateCategoryAsync — du gör GetByIdAsync, ändrar, kallar UpdateAsync, sen SaveChangesAsync.
-Du kunde skippat UpdateAsync helt.
 
 JobTemplate är inte exponerat alls = fixas efter inlämningsuppgiften
+
+
+
+ ===== Seed testanvändare =====
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<InstallFlowDbContext>();
+
+    if (!context.Users.Any()) 
+    {
+        context.Users.Add(new User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            Role = UserRole.Admin,
+            CreatedAt = DateTime.UtcNow
+       });
+
+       context.SaveChanges();
+   }
+}

@@ -1,4 +1,6 @@
-﻿using InstallFlow.Data.Enums;
+﻿// JobMaterialRow.cs
+using InstallFlow.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace InstallFlow.Data.Entities
 {
@@ -9,15 +11,13 @@ namespace InstallFlow.Data.Entities
         public int JobId { get; set; }
         public Job Job { get; set; } = null!;
 
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; } = null!;
+
         public decimal Quantity { get; set; }
         public UnitType Unit { get; set; } = UnitType.Piece;
         public decimal UnitPrice { get; set; }
-       
         public bool IsExtraMaterial { get; set; }
-
-        //public int ProductId { get; set; }
-        //public Product Product { get; set; }
-
     }
 }

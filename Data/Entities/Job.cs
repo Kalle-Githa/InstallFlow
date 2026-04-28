@@ -1,4 +1,6 @@
-﻿using InstallFlow.Data.Enums;
+﻿// Job.cs
+using InstallFlow.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace InstallFlow.Data.Entities
 {
@@ -18,8 +20,13 @@ namespace InstallFlow.Data.Entities
         public int? UpdatedByUserId { get; set; }
         public User? UpdatedByUser { get; set; }
 
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; } = null!;
+
         public JobStatus Status { get; set; } = JobStatus.Draft;
+
+        [MaxLength(2000)]
         public string? Notes { get; set; }
 
         public bool IsFixedPrice { get; set; }
@@ -37,9 +44,5 @@ namespace InstallFlow.Data.Entities
 
         public ICollection<JobLaborRow> LaborRows { get; set; } = new List<JobLaborRow>();
         public ICollection<JobMaterialRow> MaterialRows { get; set; } = new List<JobMaterialRow>();
-
-
-
-
     }
 }
