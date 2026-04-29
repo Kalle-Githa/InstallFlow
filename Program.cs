@@ -1,6 +1,8 @@
 using InstallFlow.Core.Interfaces;
 using InstallFlow.Core.Services;
 using InstallFlow.Data;
+using InstallFlow.Data.Entities;
+using InstallFlow.Data.Enums;
 using InstallFlow.Data.Interfaces;
 using InstallFlow.Data.Repos;
 using InstallFlow.Middleware;
@@ -13,6 +15,7 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+var baseUrl = builder.Configuration["APP_BASE_URL"] ?? "https://localhost:8000";
 
 // ===== 1. EF Core =====
 // Registrerar vår DbContext och talar om vilken databas vi ska använda.
@@ -54,31 +57,43 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
+        {
+            document.Servers = new List<OpenApiServer>
     {
-        document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        new OpenApiServer { Url = baseUrl } // TODO: Förklara mer
+    };
 
-        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            Description = "Klistra in din JWT-token här (utan 'Bearer')"
-        };
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 
-        var requirement = new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
-        };
+            document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Klistra in din JWT-token här (utan 'Bearer')"
+            };
 
-        foreach (var operation in document.Paths.Values.SelectMany(p => p.Operations!))
-        {
-            operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
-            operation.Value.Security.Add(requirement);
-        }
+            var requirement = new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+            };
 
-        return Task.CompletedTask;
-    });
+            foreach (var operation in document.Paths.Values.SelectMany(p => p.Operations!))
+            {
+                operation.Value.Security ??= new List<OpenApiSecurityRequirement>();
+                operation.Value.Security.Add(requirement);
+            }
+
+            return Task.CompletedTask;
+        });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options => // TODO: Förklara mer
+{
+    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 // ===== 5. DI-registreringar =====
@@ -102,7 +117,10 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 var app = builder.Build();
 
 
-
+app.UseForwardedHeaders(new ForwardedHeadersOptions // TODO: Förklara mer
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
 
 // ===== Middleware-pipeline =====
 // Ordningen här spelar roll!
@@ -112,8 +130,16 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     // Scalar ersätter Swagger — snyggar API-dokumentation
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options.Servers = new List<ScalarServer>
+    {
+        new ScalarServer(baseUrl)
+    };
+    });
 }
+
+
 
 app.UseHttpsRedirection();
 
@@ -122,6 +148,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+//===== Seed testanvändare =====
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<InstallFlowDbContext>();
+
+    if (!context.Users.Any())
+    {
+        context.Users.Add(new User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            Role = UserRole.Admin,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        context.SaveChanges();
+    }
+}
+
 
 
 

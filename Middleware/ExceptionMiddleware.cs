@@ -27,6 +27,11 @@ public class ExceptionMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        if (context.Response.HasStarted)
+        {
+            _logger.LogWarning("Response has already started, cannot modify headers.");
+            return;
+        }
         var (statusCode, message) = exception switch
         {
             KeyNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
