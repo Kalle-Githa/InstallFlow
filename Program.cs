@@ -7,6 +7,7 @@ using InstallFlow.Data.Interfaces;
 using InstallFlow.Data.Repos;
 using InstallFlow.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -14,19 +15,39 @@ using Scalar.AspNetCore;
 using System.Text;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 var baseUrl = builder.Configuration["APP_BASE_URL"] ?? "https://localhost:8000";
 
 // ===== 1. EF Core =====
 // Registrerar vår DbContext och talar om vilken databas vi ska använda.
-// GetConnectionString("DefaultConnection") hämtar strängen från appsettings.json.
+// GetConnectionString("DefaultConnection") hämtar strängen från appsettings.json men i detta fall via user-sercrets
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection saknas. Sätt via user-secrets (lokalt) eller env-variabel (Docker/Azure).");
+
 builder.Services.AddDbContext<InstallFlowDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
+
 
 // ===== 2. JWT-autentisering =====
 // Hämtar JWT-inställningar från appsettings.json
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+var jwtKey = jwtSettings["Key"]
+    ?? throw new InvalidOperationException(
+        "Jwt:Key saknas. Sätt via user-secrets (lokalt) eller env-variabel (Docker/Azure).");
+
+var jwtIssuer = jwtSettings["Issuer"]
+    ?? throw new InvalidOperationException(
+        "Jwt:Issuer saknas. Lägg till i appsettings.json eller sätt via env-variabel.");
+
+var jwtAudience = jwtSettings["Audience"]
+    ?? throw new InvalidOperationException(
+        "Jwt:Audience saknas. Lägg till i appsettings.json eller sätt via env-variabel.");
+
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -43,8 +64,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
@@ -89,12 +110,20 @@ builder.Services.AddOpenApi(options =>
         });
 });
 
-builder.Services.Configure<ForwardedHeadersOptions>(options => // TODO: Förklara mer
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    // Läs dessa två headers från proxyn
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto   // ← rätt protokoll
+                             | ForwardedHeaders.XForwardedFor;    // ← rätt IP
+
+    // Lita på ALLA proxies, oavsett IP
+    options.KnownNetworks.Clear();  // lita inte bara på lokala nätverk
+    options.KnownProxies.Clear();   // lita inte bara på kända IP-adresser
 });
+
+
+
 
 // ===== 5. DI-registreringar =====
 // Här kommer vi lägga till våra services och repositories senare, t.ex:
@@ -117,37 +146,43 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 var app = builder.Build();
 
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions // TODO: Förklara mer
-{
-    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
-});
+// MÅSTE ligga först i pipelinen så att alla efterföljande middlewares
+// ser rätt scheme (https) och rätt klient-IP. Använder konfigurationen
+// från DI ovan — därför inga argument här.
+app.UseForwardedHeaders(); // ← applicerar headers så resten av appen ser rätt värden
+
 
 // ===== Middleware-pipeline =====
 // Ordningen här spelar roll!
 app.UseMiddleware<ExceptionMiddleware>();  // ← ÖVERST — fångar allt nedanför
 
-if (app.Environment.IsDevelopment())
+// Scalar API-dokumentation — endast i Development, döljs i Production
+// (ASPNETCORE_ENVIRONMENT=Development → visas även i Azure för den här appen)
+if (!app.Environment.IsProduction())
 {
     app.MapOpenApi();
-    // Scalar ersätter Swagger — snyggar API-dokumentation
     app.MapScalarApiReference(options =>
     {
-        options.Servers = new List<ScalarServer>
-    {
-        new ScalarServer(baseUrl)
-    };
+        options.Servers = new List<ScalarServer> { new ScalarServer(baseUrl) };
     });
 }
 
+// HTTPS-redirect — aldrig inne i en container
+// Azure/Docker terminerar TLS utanför containern
+var runningInContainer =
+    Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
 
-
-app.UseHttpsRedirection();
+if (!runningInContainer)
+{
+    app.UseHttpsRedirection();
+}
 
 // Authentication MÅSTE komma före Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 //===== Seed testanvändare =====
 using (var scope = app.Services.CreateScope())
 {

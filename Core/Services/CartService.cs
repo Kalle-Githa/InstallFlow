@@ -115,11 +115,6 @@ namespace InstallFlow.Core.Services
             }).ToList();
         }
 
-
-
-
-
-
         public async Task<CartDto?> GetCartByIdAsync(int id, int userId, bool isAdmin)
         {
 
@@ -152,7 +147,6 @@ namespace InstallFlow.Core.Services
                 CartItems = cartItem
             };
         }
-
 
         public async Task<CartDto?> GetCartByUserIdAsync(int userId)
         {

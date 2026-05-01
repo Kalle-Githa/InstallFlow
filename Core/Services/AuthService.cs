@@ -53,9 +53,6 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-
-
-
     }
 
     public async Task<UserDto> CreateUserAsync(CreateUserDto dto)
@@ -84,5 +81,3 @@ public class AuthService : IAuthService
         };
     }
 }
-
-
