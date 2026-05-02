@@ -142,6 +142,8 @@ builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 
 var app = builder.Build();
 

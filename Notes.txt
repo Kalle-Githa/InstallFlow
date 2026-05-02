@@ -60,3 +60,16 @@ using (var scope = app.Services.CreateScope())
        context.SaveChanges();
    }
 }
+
+// Sätts via dotnet user-secrets set eller på en container
+//"ConnectionStrings": {
+  //  "DefaultConnection": "Server=ULTRAG\\SQLEXPRESS;Database=InstallFlowDb;Integrated Security=SSPI;TrustServerCertificate=True"
+  //}, 
+  
+  // Sätts via dotnet user-secrets set eller på en container
+ //"Key": "Superhemliganyckelnsomskavara32lång",
+ 
+ //Sätts via dotnet user-secrets set eller på en container
+  "ApplicationInsights": {
+     "ConnectionString": "InstrumentationKey=1e2f3e41-68c0-4c7d-87ec-6fc1fec331c4;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/;LiveEndpoint=https://westeurope.livediagnostics.monitor.azure.com/;ApplicationId=ab5ef13f-b3e4-4aca-ba6c-573c217d468e"
+   }
