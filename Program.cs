@@ -185,7 +185,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//===== Seed testanvändare =====
+// Default seed user för dev — byt lösenord innan produktion
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider
