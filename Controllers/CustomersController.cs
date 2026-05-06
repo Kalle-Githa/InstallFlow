@@ -31,10 +31,7 @@ namespace InstallFlow.Controllers
         public async Task<IActionResult> GetCustomer(int id)
         {
             var customer = await _customerService.GetCustomerAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+
 
             return Ok(customer);
 

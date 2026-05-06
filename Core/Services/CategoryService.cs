@@ -23,9 +23,14 @@ public class CategoryService : ICategoryService
     public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
     {
         var category = await _categoryRepo.GetByIdAsync(id);
-        if (category == null) return null;
+        if (category == null) throw new KeyNotFoundException($"Kategori med id {id} hittades inte.");
         return MapToDto(category);
+
     }
+
+
+
+
 
     public async Task<List<CategoryDto>> GetCategoryBySlugAsync(string slug)
     {

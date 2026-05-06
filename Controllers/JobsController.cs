@@ -34,7 +34,7 @@ public class JobsController : ControllerBase
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isAdmin = User.IsInRole("Admin");
         var job = await _jobService.GetJobAsync(id, userId, isAdmin);
-        if (job == null) return NotFound();
+
         return Ok(job);
     }
 

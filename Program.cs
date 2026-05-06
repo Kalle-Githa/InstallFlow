@@ -142,7 +142,16 @@ builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
-builder.Services.AddApplicationInsightsTelemetry();
+// ===== Application Insights (endast om connection string finns) =====
+var appInsightsConnection = builder.Configuration["ApplicationInsights:ConnectionString"];
+
+if (!string.IsNullOrWhiteSpace(appInsightsConnection))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appInsightsConnection;
+    });
+}
 
 
 var app = builder.Build();

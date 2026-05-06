@@ -27,10 +27,10 @@ public class JobService : IJobService
         return jobs.Select(MapToDto).ToList();
     }
 
-    public async Task<JobDto?> GetJobAsync(int id, int userId, bool isAdmin)
+    public async Task<JobDto> GetJobAsync(int id, int userId, bool isAdmin)
     {
         var job = await _jobRepo.GetByIdAsync(id);
-        if (job == null) return null;
+        if (job == null) throw new KeyNotFoundException($"Jobb med id {id} hittades inte.");
 
         if (job.CreatedByUserId != userId && !isAdmin)
             throw new UnauthorizedAccessException("Du får inte se andras jobb.");

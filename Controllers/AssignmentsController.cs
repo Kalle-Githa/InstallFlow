@@ -36,7 +36,6 @@ public class AssignmentsController : ControllerBase
     public async Task<IActionResult> GetAssignment(int id)
     {
         var assignment = await _assignmentService.GetAssignmentAsync(id);
-        if (assignment == null) return NotFound();
         return Ok(assignment);
     }
 
@@ -47,8 +46,7 @@ public class AssignmentsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var assignment = await _assignmentService.CreateAssignmentAsync(dto, userId);
-        if (assignment == null)
-            return BadRequest(new { error = "Customer not found." });
+
 
         return CreatedAtAction(nameof(GetAssignment), new { id = assignment.Id }, assignment);
     }

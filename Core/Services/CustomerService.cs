@@ -63,15 +63,12 @@ public class CustomerService : ICustomerService
         }).ToList();
     }
 
-    public async Task<CustomerDto?> GetCustomerAsync(int id)
+    public async Task<CustomerDto> GetCustomerAsync(int id)
     {
         var customer = await _customerRepo.GetByIdAsync(id);
 
-        if (customer == null)
-        {
-            return null;
+        if (customer == null) throw new KeyNotFoundException($"Kunden med id {id} hittades inte.");
 
-        }
 
         return new CustomerDto
         {

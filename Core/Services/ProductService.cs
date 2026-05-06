@@ -71,10 +71,10 @@ public class ProductService : IProductService
         return new List<ProductDto> { MapToDto(product) };
     }
 
-    public async Task<ProductDto?> GetProductByIdAsync(int id)
+    public async Task<ProductDto> GetProductByIdAsync(int id)
     {
         var product = await _productRepo.GetProductByIdAsync(id);
-        if (product == null) return null;
+        if (product == null) throw new KeyNotFoundException($"Produkt med id {id} hittades inte.");
 
 
         return MapToDto(product);

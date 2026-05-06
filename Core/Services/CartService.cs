@@ -58,12 +58,12 @@ namespace InstallFlow.Core.Services
 
 
 
-        public async Task<CartDto?> CreateCartAsync(CreateCartDto dto, int userId)
+        public async Task<CartDto> CreateCartAsync(CreateCartDto dto, int userId)
         {
             // Kolla om användaren redan har en aktiv cart
             var existingCart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (existingCart != null)
-                return null;
+                throw new UnauthorizedAccessException("Du får inte skapa en varukorg om du redan har en aktiv.");
 
             if (dto.AssignmentId.HasValue && dto.JobId.HasValue)
                 throw new ArgumentException("En varukorg får kopplas till antingen Assignment eller Job, inte båda.");
@@ -90,9 +90,9 @@ namespace InstallFlow.Core.Services
                 UpdatedAt = newCart.UpdatedAt
             };
         }
-        public async Task<List<CartDto>?> GetAllCartsAsync(bool isAdmin)
+        public async Task<List<CartDto>> GetAllCartsAsync(bool isAdmin)
         {
-            if (!isAdmin) return null;
+            if (!isAdmin) throw new UnauthorizedAccessException("Endast admin kan se alla varukorgar.");
             var carts = await _cartRepo.GetAllCartsAsync();
 
             return carts.Select(cart => new CartDto
@@ -115,12 +115,12 @@ namespace InstallFlow.Core.Services
             }).ToList();
         }
 
-        public async Task<CartDto?> GetCartByIdAsync(int id, int userId, bool isAdmin)
+        public async Task<CartDto> GetCartByIdAsync(int id, int userId, bool isAdmin)
         {
 
 
             var cart = await _cartRepo.GetCartByIdAsync(id);
-            if (cart == null) return null;
+            if (cart == null) throw new KeyNotFoundException($"Varukorg med id {id} hittades inte.");
 
             if (cart.UserId != userId && !isAdmin)
                 throw new UnauthorizedAccessException("Du får inte se andras varukorgar.");
@@ -148,12 +148,11 @@ namespace InstallFlow.Core.Services
             };
         }
 
-        public async Task<CartDto?> GetCartByUserIdAsync(int userId)
+        public async Task<CartDto> GetCartByUserIdAsync(int userId)
         {
 
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
-            if (cart == null)
-                return null;
+            if (cart == null) throw new KeyNotFoundException($"Ingen varukorg hittades för användare med id {userId}.");
 
             var cartItem = cart.CartItems.Select(x => new CartItemDto
             {

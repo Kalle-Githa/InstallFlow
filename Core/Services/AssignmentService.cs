@@ -32,18 +32,18 @@ public class AssignmentService : IAssignmentService
 
 
 
-    public async Task<AssignmentDto?> GetAssignmentAsync(int id)
+    public async Task<AssignmentDto> GetAssignmentAsync(int id)
     {
         var assignment = await _assignmentRepo.GetByIdAsync(id);
-        if (assignment == null) return null;
+        if (assignment == null) throw new KeyNotFoundException($"Uppdrag med id {id} hittades inte.");
         return MapToDto(assignment);
     }
 
-    public async Task<AssignmentDto?> CreateAssignmentAsync(CreateAssignmentDto dto, int userId)
+    public async Task<AssignmentDto> CreateAssignmentAsync(CreateAssignmentDto dto, int userId)
     {
         // Kolla att kunden finns innan vi skapar uppdraget
         var customer = await _customerRepo.GetByIdAsync(dto.CustomerId);
-        if (customer == null) return null;
+        if (customer == null) throw new KeyNotFoundException($"Kund med id {dto.CustomerId} hittades inte.");
 
         var assignment = new Assignment
         {

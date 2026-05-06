@@ -36,8 +36,6 @@ namespace InstallFlow.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var isAdmin = User.IsInRole("Admin");
             var cart = await _cartService.GetCartByIdAsync(id, userId, isAdmin);
-            if (cart == null) return NotFound();
-
 
             return Ok(cart);
         }
@@ -51,7 +49,6 @@ namespace InstallFlow.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cart = await _cartService.GetCartByUserIdAsync(userId);
-            if (cart == null) return NotFound();
 
             return Ok(cart);
 
@@ -85,10 +82,7 @@ namespace InstallFlow.Controllers
         public async Task<IActionResult> CreateCart(CreateCartDto dto)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
             var cart = await _cartService.CreateCartAsync(dto, userId);
-            if (cart == null)
-                return Conflict(new { message = "Användaren har redan en aktiv varukorg." });
 
             return CreatedAtAction(nameof(GetMyCart), null, cart);
         }

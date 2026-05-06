@@ -48,9 +48,6 @@ namespace InstallFlow.Controllers
         public async Task<IActionResult> GetProduct(int id)
         {
             var product = await _productService.GetProductByIdAsync(id);
-            if (product == null)
-                return NotFound();
-
 
             return Ok(product);
 
