@@ -28,6 +28,7 @@ public class AuthController : ControllerBase
 
         if (token == null)
             return Unauthorized(new { error = "Fel användarnamn eller lösenord." });
+        _logger.LogInformation("Användaren {Username} loggade in", dto.UserName);
 
         var expiresInMinutes = int.Parse(_configuration["Jwt:ExpiresInMinutes"] ?? "60");
 
