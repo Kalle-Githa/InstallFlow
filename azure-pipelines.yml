@@ -1,0 +1,93 @@
+﻿trigger:
+  - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  acrName: acrinstallflow
+  acrLoginServer: acrinstallflow.azurecr.io
+  imageName: installflow-api
+  imageTag: $(Build.BuildId)
+  resourceGroup: rg-installflow
+  appServiceName: app-installflow
+  serviceConnection: azure-installflow
+
+stages:
+  # ─────────────────────────────────────────
+  # STEG 1: Bygg och testa koden
+  # ─────────────────────────────────────────
+  - stage: Build
+    displayName: Build & Test
+    jobs:
+      - job: BuildJob
+        displayName: Build and Test
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Restore dependencies
+            inputs:
+              command: restore
+              projects: "**/*.sln"
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: build
+              projects: "**/*.sln"
+              arguments: "--configuration Release --no-restore"
+
+  # ─────────────────────────────────────────
+  # STEG 2: Bygg Docker-image och pusha till ACR
+  # ─────────────────────────────────────────
+  - stage: Docker
+    displayName: Docker Build & Push
+    dependsOn: Build
+    jobs:
+      - job: DockerJob
+        displayName: Build and Push Docker Image
+        steps:
+          - task: AzureCLI@2
+            displayName: Build and Push to ACR
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr build \
+                  --registry $(acrName) \
+                  --image $(imageName):$(imageTag) \
+                  --image $(imageName):latest \
+                  .
+
+  # ─────────────────────────────────────────
+  # STEG 3: Deploya till App Service
+  # ─────────────────────────────────────────
+  - stage: Deploy
+    displayName: Deploy to App Service
+    dependsOn: Docker
+    jobs:
+      - job: DeployJob
+        displayName: Deploy to Azure App Service
+        steps:
+          - task: AzureCLI@2
+            displayName: Update App Service container image
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az webapp config container set \
+                  --name $(appServiceName) \
+                  --resource-group $(resourceGroup) \
+                  --container-image-name $(acrLoginServer)/$(imageName):$(imageTag)
+
+          - task: AzureCLI@2
+            displayName: Restart App Service
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az webapp restart \
+                  --name $(appServiceName) \
+                  --resource-group $(resourceGroup)

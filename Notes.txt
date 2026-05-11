@@ -73,3 +73,24 @@ using (var scope = app.Services.CreateScope())
   "ApplicationInsights": {
      "ConnectionString": "InstrumentationKey=1e2f3e41-68c0-4c7d-87ec-6fc1fec331c4;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/;LiveEndpoint=https://westeurope.livediagnostics.monitor.azure.com/;ApplicationId=ab5ef13f-b3e4-4aca-ba6c-573c217d468e"
    }
+
+
+   // Kopia på hur det var innan. Kasta om den ersatta fungerar
+
+   # Stage 1: Bygg applikationen
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY ["InstallFlow.csproj", "."]
+RUN dotnet restore "InstallFlow.csproj"
+
+COPY . .
+WORKDIR "/src"
+RUN dotnet publish "InstallFlow.csproj" -c Release -o /app/publish
+
+# Stage 2: Kör applikationen
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "InstallFlow.dll"]

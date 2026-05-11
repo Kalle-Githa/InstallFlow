@@ -12,11 +12,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, IConfiguration configuration)
+    public AuthController(IAuthService authService, IConfiguration configuration, ILogger<AuthController> logger)
     {
         _authService = authService;
         _configuration = configuration;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -42,6 +44,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> CreateUser(CreateUserDto dto)
     {
         var user = await _authService.CreateUserAsync(dto);
+        _logger.LogInformation("Ny användare skapad: {Username} med roll {Role}", dto.Username, dto.Role);
+
         return CreatedAtAction(nameof(CreateUser), new { id = user.Id }, user);
     }
 }
