@@ -27,13 +27,13 @@ stages:
             displayName: Restore dependencies
             inputs:
               command: restore
-              projects: "**/*.sln"
+              projects: "**/*.slnx"
 
           - task: DotNetCoreCLI@2
             displayName: Build
             inputs:
               command: build
-              projects: "**/*.sln"
+              projects: "**/*.slnx"
               arguments: "--configuration Release --no-restore"
 
   # ─────────────────────────────────────────
