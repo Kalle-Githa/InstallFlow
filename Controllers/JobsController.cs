@@ -72,9 +72,12 @@ public class JobsController : ControllerBase
     public async Task<IActionResult> DeleteJob(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var isAdmin = User.IsInRole("Admin");
-        _logger.LogInformation("Jobb {id} är raderad av {userId}", id, userId);
-        await _jobService.DeleteJobAsync(id, userId, isAdmin);
+
+
+        await _jobService.DeleteJobAsync(id);
+
+        _logger.LogInformation("Jobb {JobId} raderat av användare {UserId}", id, userId);
+
 
         return NoContent();
     }

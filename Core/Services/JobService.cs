@@ -123,14 +123,10 @@ public class JobService : IJobService
         return MapToDto(job);
     }
 
-    public async Task DeleteJobAsync(int id, int userId, bool isAdmin)
+    public async Task DeleteJobAsync(int id)
     {
         var job = await _jobRepo.GetByIdAsync(id)
         ?? throw new KeyNotFoundException($"Jobb med id {id} hittades inte.");
-
-        if (job.CreatedByUserId != userId && !isAdmin)
-            throw new UnauthorizedAccessException("Du får inte radera andras jobb.");
-
 
         await _jobRepo.DeleteAsync(id);
         await _jobRepo.SaveChangesAsync();

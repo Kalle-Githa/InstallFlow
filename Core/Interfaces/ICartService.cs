@@ -4,8 +4,8 @@ namespace InstallFlow.Core.Interfaces
 {
     public interface ICartService
     {
-        Task<List<CartDto>> GetAllCartsAsync(bool isAdmin);
-        Task<CartDto> GetCartByIdAsync(int id, int userId, bool isAdmin);
+        Task<List<CartDto>> GetAllCartsAsync();
+        Task<CartDto> GetCartByIdAsync(int id);
         Task<CartDto> GetCartByUserIdAsync(int userId);
         Task<List<CartDto>> GetAllByUserIdAsync(int userId);
         Task<CartDto> CreateCartAsync(CreateCartDto dto, int userId);

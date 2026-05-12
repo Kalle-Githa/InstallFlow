@@ -8,5 +8,5 @@ public interface IJobService
     Task<JobDto> GetJobAsync(int id, int userId, bool isAdmin);
     Task<JobDto> CreateJobAsync(CreateJobDto dto, int userId);
     Task<JobDto> UpdateJobAsync(UpdateJobDto dto, int id, int userId, bool isAdmin);
-    Task DeleteJobAsync(int id, int userId, bool isAdmin);
+    Task DeleteJobAsync(int id);
 }

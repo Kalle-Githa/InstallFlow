@@ -22,8 +22,8 @@ namespace InstallFlow.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllCarts()
         {
-            var isAdmin = User.IsInRole("Admin");
-            var carts = await _cartService.GetAllCartsAsync(isAdmin);
+
+            var carts = await _cartService.GetAllCartsAsync();
             return Ok(carts);
         }
 
@@ -33,14 +33,11 @@ namespace InstallFlow.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Cart(int id)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var isAdmin = User.IsInRole("Admin");
-            var cart = await _cartService.GetCartByIdAsync(id, userId, isAdmin);
+
+            var cart = await _cartService.GetCartByIdAsync(id);
 
             return Ok(cart);
         }
-
-
 
 
         [Authorize]
