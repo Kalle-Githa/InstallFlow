@@ -11,10 +11,12 @@ namespace InstallFlow.Controllers;
 public class JobsController : ControllerBase
 {
     private readonly IJobService _jobService;
+    private readonly ILogger<JobsController> _logger;
 
-    public JobsController(IJobService jobService)
+    public JobsController(IJobService jobService, ILogger<JobsController> logger)
     {
         _jobService = jobService;
+        _logger = logger;
     }
 
     [Authorize]
@@ -71,6 +73,7 @@ public class JobsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isAdmin = User.IsInRole("Admin");
+        _logger.LogInformation("Jobb {id} är raderad av {userId}", id, userId);
         await _jobService.DeleteJobAsync(id, userId, isAdmin);
 
         return NoContent();
