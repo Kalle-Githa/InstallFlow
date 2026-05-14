@@ -4,14 +4,7 @@
 pool:
   vmImage: ubuntu-latest
 
-variables:
-  acrName: acrinstallflow
-  acrLoginServer: acrinstallflow.azurecr.io
-  imageName: installflow-api
-  imageTag: $(Build.BuildId)
-  resourceGroup: rg-installflow
-  appServiceName: app-installflow
-  serviceConnection: azure-installflow
+
 
 stages:
   # ─────────────────────────────────────────
