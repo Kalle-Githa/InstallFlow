@@ -118,7 +118,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
                              | ForwardedHeaders.XForwardedFor;    // ← rätt IP
 
     // Lita på ALLA proxies, oavsett IP
-    options.KnownNetworks.Clear();  // lita inte bara på lokala nätverk
+    options.KnownIPNetworks.Clear();  // lita inte bara på lokala nätverk
     options.KnownProxies.Clear();   // lita inte bara på kända IP-adresser
 });
 
