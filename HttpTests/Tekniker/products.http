@@ -1,0 +1,91 @@
+@host = https://localhost:8000
+@contentType = application/json
+
+### Logga in som tekniker — KÖR DENNA FÖRST
+# @name login
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "tekniker1",
+  "password": "Password123!"
+}
+
+### Hämta alla produkter (anonymt OK)
+GET {{host}}/api/products
+
+### Pagination — sida 2 med 5 per sida
+GET {{host}}/api/products?page=2&pageSize=5
+
+### Filter — bara material-typ (0=Material)
+GET {{host}}/api/products?type=0
+
+### Slug-sökning
+GET {{host}}/api/products?slug=cat6-kabel
+
+### Produkt på id
+GET {{host}}/api/products/1
+
+### Produkt som inte finns → 404
+GET {{host}}/api/products/99999
+
+### Skapa produkt → 201
+# @name createProduct
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Cat6-kabel",
+  "description": "UTP-kabel kategori 6",
+  "defaultPrice": 12.50,
+  "unit": 1,
+  "type": 0,
+  "image": "/images/cat6.png",
+  "categories": [1]
+}
+
+### JSON Patch — uppdatera namn → 200
+PATCH {{host}}/api/products/{{createProduct.response.body.$.id}}
+Content-Type: application/json-patch+json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+[
+  { "op": "replace", "path": "/name", "value": "Cat6-kabel UTP (uppdaterad)" }
+]
+
+### Negativtest — Name saknas → 400
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "description": "Saknar namn",
+  "defaultPrice": 100,
+  "categories": [1]
+}
+
+### Negativtest — categories tom array → 400
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Ingen kategori",
+  "defaultPrice": 100,
+  "categories": []
+}
+
+### Negativtest — utan token → 401
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Försök utan token",
+  "defaultPrice": 100,
+  "categories": [1]
+}
+
+### Negativtest — försök radera (kräver Admin) → 403
+DELETE {{host}}/api/products/{{createProduct.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}

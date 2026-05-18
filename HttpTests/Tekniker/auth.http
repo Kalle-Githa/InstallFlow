@@ -1,0 +1,44 @@
+@host = https://localhost:8000
+@contentType = application/json
+
+### Logga in som tekniker — KÖR DENNA FÖRST i denna fil
+# @name login
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "tekniker1",
+  "password": "Password123!"
+}
+
+### Verifiera att inloggning fungerar
+GET {{host}}/api/customers
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Negativtest — fel lösenord → 401
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "tekniker1",
+  "password": "fellosenord"
+}
+
+### Negativtest — saknar userName → 400
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "password": "Password123!"
+}
+
+### Negativtest — försök skapa user (kräver Admin) → 403
+POST {{host}}/api/auth/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "username": "skahindras",
+  "password": "Password123!",
+  "role": 0
+}

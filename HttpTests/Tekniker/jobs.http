@@ -1,0 +1,146 @@
+@host = https://localhost:8000
+@contentType = application/json
+
+### Setup — KÖR DESSA TRE FÖRST
+# @name login
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "tekniker1",
+  "password": "Password123!"
+}
+
+### Skapa kund
+# @name createCustomer
+POST {{host}}/api/customers
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "company": "Sharp AB",
+  "person": "Anna Andersson",
+  "email": "anna@sharp.se",
+  "phone": "0701234567",
+  "organizationNumber": "556677-8899"
+}
+
+### Skapa uppdrag
+# @name createAssignment
+POST {{host}}/api/assignments
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "customerId": {{createCustomer.response.body.$.id}},
+  "name": "Sharp kontor våning 2",
+  "description": "Fiberinstallation",
+  "address": "Storgatan 1"
+}
+
+### Hämta alla jobb
+GET {{host}}/api/jobs
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Hämta jobb för specifikt uppdrag
+GET {{host}}/api/jobs?assignmentId={{createAssignment.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Skapa jobb med rader → 201
+# @name createJob
+POST {{host}}/api/jobs
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "assignmentId": {{createAssignment.response.body.$.id}},
+  "name": "Fiberinstallation våning 2",
+  "notes": "Dragning + svetsning",
+  "isFixedPrice": false,
+  "laborMarkupType": "Percentage",
+  "laborMarkupValue": 30,
+  "materialMarkupType": "Percentage",
+  "materialMarkupValue": 25,
+  "laborRows": [
+    {
+      "name": "Dragning",
+      "hours": 4.5,
+      "hourlyRate": 650
+    },
+    {
+      "name": "Svetsning fiber",
+      "hours": 2,
+      "hourlyRate": 750
+    }
+  ],
+  "materialRows": [
+    {
+      "name": "Cat6-kabel",
+      "quantity": 50,
+      "unit": "Meter",
+      "unitPrice": 12.50,
+      "isExtraMaterial": false
+    },
+    {
+      "name": "Keystone jack",
+      "quantity": 8,
+      "unit": "Piece",
+      "unitPrice": 45,
+      "isExtraMaterial": false
+    }
+  ]
+}
+
+### Skapa fastpris-jobb → 201
+POST {{host}}/api/jobs
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "assignmentId": {{createAssignment.response.body.$.id}},
+  "name": "Driftsättning Bas",
+  "isFixedPrice": true,
+  "fixedCustomerPrice": 5000,
+  "fixedInternalCost": 2500,
+  "laborRows": [],
+  "materialRows": []
+}
+
+### Hämta jobb på id
+GET {{host}}/api/jobs/{{createJob.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Uppdatera jobb → 200
+PATCH {{host}}/api/jobs/{{createJob.response.body.$.id}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Fiberinstallation våning 2 — uppdaterad",
+  "status": "InProgress",
+  "laborMarkupValue": 35
+}
+
+### Negativtest — Name saknas → 400
+POST {{host}}/api/jobs
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "assignmentId": {{createAssignment.response.body.$.id}}
+}
+
+### Negativtest — negativt pris → 400
+POST {{host}}/api/jobs
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Ogiltig",
+  "isFixedPrice": true,
+  "fixedCustomerPrice": -100
+}
+
+### Negativtest — försök radera (kräver Admin) → 403
+DELETE {{host}}/api/jobs/{{createJob.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
