@@ -21,10 +21,13 @@ GET {{host}}/api/products?page=2&pageSize=5
 GET {{host}}/api/products?type=0
 
 ### Slug-sökning
-GET {{host}}/api/products?slug=cat6-kabel
+GET {{host}}/api/products?slug=switch-24-port
+
+### Sök valfritt
+GET {{host}}/api/products?search=port
 
 ### Produkt på id
-GET {{host}}/api/products/1
+GET {{host}}/api/products/35
 
 ### Produkt som inte finns → 404
 GET {{host}}/api/products/99999
@@ -42,7 +45,7 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
   "unit": 1,
   "type": 0,
   "image": "/images/cat6.png",
-  "categories": [1]
+  "categories": [7]
 }
 
 ### JSON Patch — uppdatera namn → 200

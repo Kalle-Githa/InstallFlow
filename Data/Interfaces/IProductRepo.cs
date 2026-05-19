@@ -10,6 +10,7 @@ namespace InstallFlow.Data.Interfaces
         Task<List<Product>> GetAllAsync(int page, int pageSize);
         Task<Product> CreateAsync(Product product);
         Task<Product?> GetBySlugAsync(string slug);
+        Task<IEnumerable<Product>> SearchAsync(string searchTerm, int page, int pageSize);
         Task UpdateAsync(Product product);
         Task DeleteAsync(int id);
         Task SaveChangesAsync();

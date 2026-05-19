@@ -97,6 +97,12 @@ public class ProductService : IProductService
         return products.Select(MapToDto).ToList();
     }
 
+    public async Task<IEnumerable<ProductDto>> SearchProductsAsync(string searchTerm, int page, int pageSize)
+    {
+        var products = await _productRepo.SearchAsync(searchTerm, page, pageSize);
+        return products.Select(MapToDto);
+    }
+
 
     public async Task<ProductDto> UpdateProductAsync(JsonPatchDocument<UpdateProductDto> patchDoc, int id, int userId, bool isAdmin)
     {

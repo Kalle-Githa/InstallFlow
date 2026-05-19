@@ -1,4 +1,4 @@
-@host = https://localhost:8000
+@host = https://app-installflow.azurewebsites.net/
 @contentType = application/json
 
 ### Logga in som admin — KÖR DENNA FÖRST
@@ -18,7 +18,7 @@ GET {{host}}/api/categories
 GET {{host}}/api/categories?slug=fiber
 
 ### Kategori på id
-GET {{host}}/api/categories/1
+GET {{host}}/api/categories/13
 
 ### Kategori som inte finns → 404
 GET {{host}}/api/categories/99999
@@ -44,7 +44,7 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 ]
 
 ### Ta bort produkt från kategori
-DELETE {{host}}/api/categories/{{createCategory.response.body.$.id}}/products/1
+DELETE {{host}}/api/categories/2/products/1
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### Negativtest — Name saknas → 400
@@ -59,3 +59,7 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 ### Radera kategori → 204
 DELETE {{host}}/api/categories/{{createCategory.response.body.$.id}}
 Authorization: Bearer {{login.response.body.$.accessToken}}
+
+
+
+

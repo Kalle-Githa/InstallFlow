@@ -20,24 +20,33 @@ namespace InstallFlow.Controllers
         }
 
 
-
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts([FromQuery] string? slug, [FromQuery] ProductType? type, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllProducts(
+            [FromQuery] string? slug,
+            [FromQuery] string? search,
+            [FromQuery] ProductType? type,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            if (slug != null)
+            if (!string.IsNullOrWhiteSpace(slug))
             {
                 var bySlug = await _productService.GetProductBySlugAsync(slug);
                 return Ok(bySlug);
             }
 
-            if (type != null)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var bySearch = await _productService.SearchProductsAsync(search, page, pageSize);
+                return Ok(bySearch);
+            }
+
+            if (type.HasValue)
             {
                 var byType = await _productService.GetProductsByTypeAsync(type.Value);
                 return Ok(byType);
             }
 
             var products = await _productService.GetAllProductAsync(page, pageSize);
-
             return Ok(products);
         }
 

@@ -49,6 +49,20 @@ namespace InstallFlow.Data.Repos
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Product>> SearchAsync(string searchTerm, int page, int pageSize)
+        {
+            var term = searchTerm.ToLower();
+
+            return await _context.Products
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .Where(p => p.Name.ToLower().Contains(term)
+                         || (p.Description != null && p.Description.ToLower().Contains(term)))
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
         public async Task<Product> CreateAsync(Product product)
         {
             await _context.Products.AddAsync(product);

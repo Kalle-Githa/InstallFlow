@@ -1,4 +1,4 @@
-@host = https://localhost:8000
+@host = https://app-installflow.azurewebsites.net
 @contentType = application/json
 
 ### Logga in som admin — KÖR DENNA FÖRST
@@ -24,7 +24,7 @@ GET {{host}}/api/products?type=0
 GET {{host}}/api/products?slug=cat6-kabel
 
 ### Produkt på id
-GET {{host}}/api/products/1
+GET {{host}}/api/products/7
 
 ### Produkt som inte finns → 404
 GET {{host}}/api/products/99999
@@ -42,7 +42,7 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
   "unit": 1,
   "type": 0,
   "image": "/images/cat6.png",
-  "categories": [1]
+  "categories": [7]
 }
 
 ### JSON Patch — uppdatera namn → 200
@@ -102,3 +102,21 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### Verifiera att den är borta → 404
 GET {{host}}/api/products/{{createProduct.response.body.$.id}}
+
+
+
+### Skapa produkt 1 → 201
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Cat6-kabel",
+  "description": "UTP-kabel kategori 6, 305m rulle",
+  "defaultPrice": 12.50,
+  "unit": 1,
+  "type": 0,
+  "image": "/images/cat6.png",
+  "categories": [2]
+}
+
