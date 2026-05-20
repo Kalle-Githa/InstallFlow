@@ -1,0 +1,78 @@
+
+@contentType = application/json
+
+### Setup — KÖR DESSA TVÅ FÖRST
+# @name login
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "{{techUserName}}",
+  "password": "{{techPassword}}"
+}
+
+### Skapa kund så vi har en customerId
+# @name createCustomer
+POST {{host}}/api/customers
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "company": "Sharp AB",
+  "person": "Anna Andersson",
+  "email": "anna@sharp.se",
+  "phone": "0701234567",
+  "organizationNumber": "556677-8899"
+}
+
+### Hämta alla uppdrag
+GET {{host}}/api/assignments
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Skapa uppdrag → 201
+# @name createAssignment
+POST {{host}}/api/assignments
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "customerId": {{createCustomer.response.body.$.id}},
+  "name": "Sharp kontor våning 2",
+  "description": "Ny fiberinstallation till hela våningen",
+  "address": "Storgatan 1, Stockholm"
+}
+
+### Hämta uppdrag på id
+GET {{host}}/api/assignments/{{createAssignment.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Uppdatera uppdrag → 200
+PATCH {{host}}/api/assignments/{{createAssignment.response.body.$.id}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Sharp kontor våning 3",
+  "status": "InProgress"
+}
+
+### Negativtest — Name saknas → 400
+POST {{host}}/api/assignments
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "customerId": {{createCustomer.response.body.$.id}}
+}
+
+### Negativtest — CustomerId saknas → 400
+POST {{host}}/api/assignments
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "name": "Uppdrag utan kund"
+}
+
+### Negativtest — utan token → 401
+GET {{host}}/api/assignments

@@ -1,0 +1,83 @@
+
+@contentType = application/json
+
+### Logga in som admin — KÖR DENNA FÖRST
+# @name login
+POST {{host}}/api/auth
+Content-Type: {{contentType}}
+
+{
+  "userName": "{{adminUserName}}",
+  "password": "{{adminPassword}}"
+}
+
+### Hämta MIN aktiva varukorg
+GET {{host}}/api/carts/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Hämta MIN historik
+GET {{host}}/api/carts/me/history
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Skapa ny varukorg → 201
+# @name createCart
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "assignmentId": null,
+  "jobId": null
+}
+
+### Lägg till produkt i aktiv varukorg
+POST {{host}}/api/carts/items
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "productId": 1,
+  "quantity": 3
+}
+
+### Uppdatera antal (byt :1 mot riktigt cartItemId)
+PATCH {{host}}/api/carts/items/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "quantity": 7
+}
+
+### Ta bort en rad
+DELETE {{host}}/api/carts/items/1
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Slutför varukorg
+POST {{host}}/api/carts/{{createCart.response.body.$.id}}/complete
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Hämta varukorg på id (admin-vy)
+GET {{host}}/api/carts/{{createCart.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Lista alla carts (admin-vy)
+GET {{host}}/api/carts
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Negativtest — Quantity 0 → 400
+POST {{host}}/api/carts/items
+Content-Type: {{contentType}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "productId": 1,
+  "quantity": 0
+}
+
+### Negativtest — utan token → 401
+GET {{host}}/api/carts/me
+
+### Radera cart
+DELETE {{host}}/api/carts/{{createCart.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
