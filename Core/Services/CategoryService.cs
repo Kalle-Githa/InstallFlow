@@ -14,10 +14,10 @@ public class CategoryService : ICategoryService
 
 
 
-    public async Task<List<CategoryListDto>> GetAllCategoriesAsync()
+    public async Task<List<CategoryDto>> GetAllCategoriesAsync()
     {
         var categories = await _categoryRepo.GetAllAsync();
-        return categories.Select(MapToListDto).ToList();
+        return categories.Select(MapToDto).ToList();
     }
 
     public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
@@ -113,13 +113,4 @@ public class CategoryService : ICategoryService
         }).ToList()
     };
 
-    // För listan — bara antal produkter
-    private CategoryListDto MapToListDto(Category category) => new CategoryListDto
-    {
-        Id = category.Id,
-        Name = category.Name,
-        Image = category.Image,
-        UrlSlug = category.UrlSlug,
-        ProductCount = category.ProductCategories.Count  // ← Count istället för hela listan
-    };
 }

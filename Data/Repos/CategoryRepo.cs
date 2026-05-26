@@ -13,6 +13,7 @@ public class CategoryRepo : ICategoryRepo
         return await _context.Categories
             .AsNoTracking()
             .Include(c => c.ProductCategories)
+                .ThenInclude(pc => pc.Product)
             .AsSplitQuery()
             .ToListAsync();
     }
