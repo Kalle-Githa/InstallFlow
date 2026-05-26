@@ -18,7 +18,7 @@ public class AssignmentRepo : IAssignmentRepo
     {
         return await _context.Assignments
             .AsNoTracking()
-            .Include(a => a.Customer)      // ← hämta kunden med, för CustomerName
+            .Include(a => a.Customer)
             .ToListAsync();
     }
 

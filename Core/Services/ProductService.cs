@@ -113,7 +113,7 @@ public class ProductService : IProductService
             throw new UnauthorizedAccessException("Du får inte ändra andras produkter.");
 
 
-        // Steg 2: Mappa entitet → DTO
+        //  Mappa entitet → DTO
         var dto = new UpdateProductDto
         {
             Name = product.Name,
@@ -122,10 +122,10 @@ public class ProductService : IProductService
             Image = product.Image
         };
 
-        // Steg 3: Applicera patch-operationerna på DTO:n
+        // Applicera patch-operationerna på DTO:n
         patchDoc.ApplyTo(dto);
 
-        // Steg 4: Mappa tillbaka DTO → entitet
+        // Mappa tillbaka DTO → entitet
         if (dto.Name != null) product.Name = dto.Name;
         if (dto.Description != null) product.Description = dto.Description;
         if (dto.DefaultPrice.HasValue) product.DefaultPrice = dto.DefaultPrice.Value;

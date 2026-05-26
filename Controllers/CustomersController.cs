@@ -50,9 +50,9 @@ namespace InstallFlow.Controllers
 
 
             return CreatedAtAction(
-                nameof(GetCustomer),      // Action som bygger Location-URL
-                new { id = customer.Id }, // Id i URL:en → /api/customers/5
-                customer                  // Ska vara i body
+                nameof(GetCustomer),
+                new { id = customer.Id },
+                customer
             );
         }
 

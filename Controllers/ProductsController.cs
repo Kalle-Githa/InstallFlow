@@ -71,8 +71,6 @@ namespace InstallFlow.Controllers
             return CreatedAtAction(
                 nameof(GetProduct),
                 new { id = product.Id }, product);
-            // → id:t för den nyskapade produkten → bygger URL:en
-            // → product hela produktobjektet → skickas som JSON-body i svaret
 
         }
 
