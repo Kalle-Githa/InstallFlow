@@ -85,21 +85,3 @@ COPY --from=publish /app/publish .
 
 # Startkommando när containern körs.
 ENTRYPOINT ["dotnet", "InstallFlow.dll"]
-
-
-
-
-# ------------------------------
-# CLI kommandon
-# ------------------------------
-
-## Bygg produktions-image
-#docker build -t installflow:latest .
-#
-## Kör den
-#docker run -p 8080:8080 installflow:latest
-#
-## Bygg en debug-version
-#docker build --build-arg BUILD_CONFIGURATION=Debug -t installflow:debug .
-
-# ------------------------------
